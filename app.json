@@ -28,8 +28,16 @@
       [
         "expo-notifications",
         {}
-      ]
+      ],
+      "expo-status-bar"
     ],
-    "scheme": "dachsi"
+    "scheme": "dachsi",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "48fdbce5-d2a4-41c4-ba6f-54fabcd8bf3e"
+      }
+    },
+    "owner": "danielzrs-team"
   }
 }

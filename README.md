@@ -53,5 +53,5 @@ src/
 
 ## Notas
 
-- Expo Go solo soporta el SDK más reciente: desactivá la actualización automática de Expo Go mientras dure el MVP.
+- El proyecto usa **SDK 57** porque Expo Go del App Store todavía no soporta SDK 58 (oct 2026). Expo Go solo soporta un SDK a la vez: desactivá su actualización automática mientras dure el MVP, o al actualizarse dejará de abrir el proyecto hasta pasarlo a SDK 58.
 - Los datos viven dentro de Expo Go. Usá **Perfil → Exportar respaldo** de vez en cuando.

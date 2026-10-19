@@ -69,7 +69,7 @@ export default function Hoy() {
         <Muted>
           {logs.length === 0
             ? 'Todavía no hay registros hoy.'
-            : `Último: ${last.kind === 'pipi' ? 'pipí' : 'popó'} ${last.place} · ${minutesAgo(last.logged_at)}`}
+            : `Último: ${last.kind === 'pipi' ? 'pipí' : 'popó'} ${last.place === 'fuera' ? 'afuera' : 'adentro'} · ${minutesAgo(last.logged_at)}`}
         </Muted>
         <View style={styles.row}>
           <Stat value={outside} label="afuera" color={colors.green} />

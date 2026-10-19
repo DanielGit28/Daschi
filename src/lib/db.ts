@@ -46,6 +46,8 @@ const DATABASE_VERSION = 1;
  * sobreviven a cada actualización de la app.
  */
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
+  // foreign_keys vale solo para la conexión actual: hay que activarlo en cada arranque.
+  await db.execAsync('PRAGMA foreign_keys = ON');
   const row = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   let current = row?.user_version ?? 0;
   if (current >= DATABASE_VERSION) return;
@@ -53,7 +55,6 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
   if (current < 1) {
     await db.execAsync(`
       PRAGMA journal_mode = 'wal';
-      PRAGMA foreign_keys = ON;
 
       CREATE TABLE IF NOT EXISTS dogs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
