@@ -1,29 +1,17 @@
-import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useCallback, useState } from 'react';
-import { Alert, Share, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Share, StyleSheet, Text } from 'react-native';
 import { DogForm } from '../../components/DogForm';
 import { Button, Card, H2, Muted, Screen } from '../../components/ui';
-import { exportAll, getReminders, updateDog, type Reminder } from '../../lib/db';
+import { exportAll, updateDog } from '../../lib/db';
 import { useDog } from '../../lib/dog-context';
-import { colors, space } from '../../lib/theme';
-
-function reminderWhen(r: Reminder) {
-  if (r.interval_min) return `cada ${r.interval_min} min`;
-  return r.time_of_day ?? '';
-}
+import { syncReminders } from '../../lib/notifications';
+import { colors } from '../../lib/theme';
 
 export default function Perfil() {
   const db = useSQLiteContext();
   const { dog, reload } = useDog();
   const [editing, setEditing] = useState(false);
-  const [reminders, setReminders] = useState<Reminder[]>([]);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (dog) getReminders(db, dog.id).then(setReminders);
-    }, [db, dog]),
-  );
 
   if (!dog) return null;
 
@@ -41,6 +29,7 @@ export default function Perfil() {
           onSubmit={async (input) => {
             await updateDog(db, dog.id, input);
             await reload();
+            await syncReminders(db); // los avisos llevan el nombre del cachorro
             setEditing(false);
           }}
         />
@@ -53,17 +42,6 @@ export default function Perfil() {
           <Button label="Editar" variant="secondary" onPress={() => setEditing(true)} />
         </Card>
       )}
-
-      <Card>
-        <H2>Recordatorios</H2>
-        <Muted>Ya están creados con horarios típicos para 8 semanas. Se activan y editan el miércoles.</Muted>
-        {reminders.map((r) => (
-          <View key={r.id} style={styles.reminder}>
-            <Text style={styles.reminderLabel}>{r.label}</Text>
-            <Text style={styles.reminderWhen}>{reminderWhen(r)}</Text>
-          </View>
-        ))}
-      </Card>
 
       <Card>
         <H2>Respaldo</H2>
@@ -83,7 +61,4 @@ export default function Perfil() {
 
 const styles = StyleSheet.create({
   name: { fontSize: 24, fontWeight: '800', color: colors.text },
-  reminder: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: space.xs },
-  reminderLabel: { fontSize: 15, color: colors.text, flex: 1 },
-  reminderWhen: { fontSize: 15, color: colors.textMuted },
 });

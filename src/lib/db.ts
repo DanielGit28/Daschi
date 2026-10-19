@@ -36,9 +36,15 @@ export type Reminder = {
   time_of_day: string | null;
   enabled: number; // 0 | 1
   notification_id: string | null;
+  // Silencio de noche (HH:MM) para los recordatorios por intervalo.
+  quiet_start: string | null;
+  quiet_end: string | null;
 };
 
-const DATABASE_VERSION = 1;
+export const DEFAULT_QUIET_START = '22:00';
+export const DEFAULT_QUIET_END = '06:00';
+
+const DATABASE_VERSION = 2;
 
 /**
  * Migraciones con PRAGMA user_version: cada versión nueva agrega un bloque
@@ -90,6 +96,15 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
     current = 1;
   }
 
+  if (current < 2) {
+    await db.execAsync(`
+      ALTER TABLE reminders ADD COLUMN quiet_start TEXT;
+      ALTER TABLE reminders ADD COLUMN quiet_end TEXT;
+      UPDATE reminders SET quiet_start = '${DEFAULT_QUIET_START}', quiet_end = '${DEFAULT_QUIET_END}' WHERE interval_min IS NOT NULL;
+    `);
+    current = 2;
+  }
+
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
 
@@ -138,13 +153,14 @@ export async function addPottyLog(
   place: PottyPlace,
   at: Date = new Date(),
 ) {
-  await db.runAsync(
+  const result = await db.runAsync(
     'INSERT INTO potty_logs (dog_id, kind, place, logged_at) VALUES (?, ?, ?, ?)',
     dogId,
     kind,
     place,
     at.toISOString(),
   );
+  return result.lastInsertRowId;
 }
 
 export function getPottyLogsSince(db: SQLiteDatabase, dogId: number, since: Date) {
@@ -159,9 +175,14 @@ export async function deletePottyLog(db: SQLiteDatabase, id: number) {
   await db.runAsync('DELETE FROM potty_logs WHERE id = ?', id);
 }
 
+/** Último registro de baño (pipí o popó, dentro o fuera): desde ahí se cuenta la próxima salida. */
+export function getLastPottyLog(db: SQLiteDatabase, dogId: number) {
+  return db.getFirstAsync<PottyLog>('SELECT * FROM potty_logs WHERE dog_id = ? ORDER BY logged_at DESC LIMIT 1', dogId);
+}
+
 // ---------- Recordatorios ----------
 
-/** Recordatorios por defecto para un cachorro de ~8 semanas; se editan el miércoles. */
+/** Recordatorios por defecto para un cachorro de ~8 semanas; empiezan apagados. */
 async function seedDefaultReminders(db: SQLiteDatabase, dogId: number) {
   const defaults: Array<[ReminderKind, string, number | null, string | null]> = [
     ['bano', 'Salida al baño', 60, null],
@@ -169,21 +190,55 @@ async function seedDefaultReminders(db: SQLiteDatabase, dogId: number) {
     ['comida', 'Almuerzo', null, '12:00'],
     ['comida', 'Cena', null, '17:30'],
     ['sesion', 'Sesión de entrenamiento (5 min)', null, '10:00'],
+    ['siesta', 'Siesta de la tarde', null, '14:00'],
   ];
   for (const [kind, label, interval, time] of defaults) {
     await db.runAsync(
-      'INSERT INTO reminders (dog_id, kind, label, interval_min, time_of_day, enabled) VALUES (?, ?, ?, ?, ?, 0)',
+      'INSERT INTO reminders (dog_id, kind, label, interval_min, time_of_day, enabled, quiet_start, quiet_end) VALUES (?, ?, ?, ?, ?, 0, ?, ?)',
       dogId,
       kind,
       label,
       interval,
       time,
+      interval ? DEFAULT_QUIET_START : null,
+      interval ? DEFAULT_QUIET_END : null,
     );
   }
 }
 
 export function getReminders(db: SQLiteDatabase, dogId: number) {
-  return db.getAllAsync<Reminder>('SELECT * FROM reminders WHERE dog_id = ? ORDER BY id', dogId);
+  return db.getAllAsync<Reminder>(
+    'SELECT * FROM reminders WHERE dog_id = ? ORDER BY interval_min IS NULL, time_of_day, id',
+    dogId,
+  );
+}
+
+export type ReminderPatch = Partial<Pick<Reminder, 'label' | 'kind' | 'interval_min' | 'time_of_day' | 'enabled' | 'quiet_start' | 'quiet_end'>>;
+
+export async function updateReminder(db: SQLiteDatabase, id: number, patch: ReminderPatch) {
+  const keys = Object.keys(patch) as Array<keyof ReminderPatch>;
+  if (keys.length === 0) return;
+  await db.runAsync(
+    `UPDATE reminders SET ${keys.map((k) => `${k} = ?`).join(', ')} WHERE id = ?`,
+    ...keys.map((k) => patch[k] ?? null),
+    id,
+  );
+}
+
+/** Recordatorio nuevo a hora fija (comida, siesta, sesión o una salida al baño de madrugada). */
+export async function addFixedReminder(db: SQLiteDatabase, dogId: number, kind: ReminderKind, label: string, time: string) {
+  const result = await db.runAsync(
+    'INSERT INTO reminders (dog_id, kind, label, time_of_day, enabled) VALUES (?, ?, ?, ?, 1)',
+    dogId,
+    kind,
+    label,
+    time,
+  );
+  return result.lastInsertRowId;
+}
+
+export async function deleteReminder(db: SQLiteDatabase, id: number) {
+  await db.runAsync('DELETE FROM reminders WHERE id = ?', id);
 }
 
 // ---------- Exportar / importar ----------
@@ -238,8 +293,11 @@ export async function importAll(db: SQLiteDatabase, data: DachsiExport) {
     }
     for (const r of data.reminders ?? []) {
       await db.runAsync(
-        'INSERT INTO reminders (id, dog_id, kind, label, interval_min, time_of_day, enabled) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO reminders (id, dog_id, kind, label, interval_min, time_of_day, enabled, quiet_start, quiet_end) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         r.id, r.dog_id, r.kind, r.label, r.interval_min, r.time_of_day, r.enabled,
+        // Los respaldos de la versión 1 no traen silencio de noche.
+        r.quiet_start ?? (r.interval_min ? DEFAULT_QUIET_START : null),
+        r.quiet_end ?? (r.interval_min ? DEFAULT_QUIET_END : null),
       );
     }
   });

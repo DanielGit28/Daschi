@@ -26,6 +26,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="hoy" options={{ title: 'Hoy', tabBarIcon: ({ focused }) => <TabIcon emoji="☀️" focused={focused} /> }} />
       <Tabs.Screen name="aprender" options={{ title: 'Aprender', tabBarIcon: ({ focused }) => <TabIcon emoji="🎓" focused={focused} /> }} />
       <Tabs.Screen name="registro" options={{ title: 'Registro', tabBarIcon: ({ focused }) => <TabIcon emoji="📝" focused={focused} /> }} />
+      <Tabs.Screen name="recordatorios" options={{ title: 'Avisos', tabBarIcon: ({ focused }) => <TabIcon emoji="🔔" focused={focused} /> }} />
       <Tabs.Screen name="perfil" options={{ title: 'Perfil', tabBarIcon: ({ focused }) => <TabIcon emoji="🐾" focused={focused} /> }} />
     </Tabs>
   );
