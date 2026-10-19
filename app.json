@@ -1,13 +1,14 @@
 {
   "expo": {
-    "name": "dachsi",
+    "name": "Dachsi",
     "slug": "dachsi",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.daniel.dachsi"
     },
     "android": {
       "adaptiveIcon": {
@@ -20,6 +21,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      [
+        "expo-notifications",
+        {}
+      ]
+    ],
+    "scheme": "dachsi"
   }
 }
