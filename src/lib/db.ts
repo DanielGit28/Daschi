@@ -1,6 +1,8 @@
 import { randomUUID } from 'expo-crypto';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import type { GoalId, Household, PottySpot } from '../content';
+import { emitLocalChange } from './changes';
+import { SYNC_TABLES, SYNC_TABLE_NAMES, type SyncTable } from './sync-schema';
 
 export const DATABASE_NAME = 'dachsi.db';
 
@@ -88,19 +90,7 @@ const now = () => new Date().toISOString();
 /** UUID v4 generado dentro de SQLite (para migrar filas existentes). */
 const SQL_UUID = `(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))), 2) || '-' || substr('89ab', 1 + (abs(random()) % 4), 1) || substr(lower(hex(randomblob(2))), 2) || '-' || lower(hex(randomblob(6))))`;
 
-/** Columnas sincronizables de cada tabla, con las tablas padre primero. */
-export const SYNC_TABLES = {
-  dogs: ['id', 'name', 'breed', 'birth_date', 'weight_kg', 'photo_uri', 'created_at', 'arrival_date', 'potty_spot', 'daily_minutes', 'household', 'setup_done'],
-  potty_logs: ['id', 'dog_id', 'kind', 'place', 'logged_at', 'note'],
-  reminders: ['id', 'dog_id', 'kind', 'label', 'interval_min', 'time_of_day', 'enabled', 'quiet_start', 'quiet_end'],
-  dog_goals: ['id', 'dog_id', 'goal'],
-  checklist_done: ['id', 'dog_id', 'item_id', 'done_at'],
-  session_logs: ['id', 'dog_id', 'lesson_id', 'logged_at', 'reps', 'rating', 'note'],
-  socialization_logs: ['id', 'dog_id', 'item_id', 'logged_at', 'reaction'],
-} as const;
-
-export type SyncTable = keyof typeof SYNC_TABLES;
-export const SYNC_TABLE_NAMES = Object.keys(SYNC_TABLES) as SyncTable[];
+export { SYNC_TABLES, SYNC_TABLE_NAMES, type SyncTable };
 
 /**
  * Migraciones con PRAGMA user_version: cada versión nueva agrega un bloque
@@ -305,12 +295,14 @@ async function upsert(db: SQLiteDatabase, table: SyncTable, row: Record<string, 
      ON CONFLICT(id) DO UPDATE SET ${cols.filter((c) => c !== 'id').map((c) => `${c} = excluded.${c}`).join(', ')}`,
     ...cols.map((c) => (full as Record<string, Value>)[c]),
   );
+  emitLocalChange();
 }
 
 async function patchRow(db: SQLiteDatabase, table: SyncTable, id: string, patch: Record<string, Value>) {
   const full = { ...patch, updated_at: now(), dirty: 1 };
   const cols = Object.keys(full);
   await db.runAsync(`UPDATE ${table} SET ${cols.map((c) => `${c} = ?`).join(', ')} WHERE id = ?`, ...cols.map((c) => full[c as keyof typeof full] as Value), id);
+  emitLocalChange();
 }
 
 const softDelete = (db: SQLiteDatabase, table: SyncTable, id: string) => patchRow(db, table, id, { deleted: 1 });

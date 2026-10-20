@@ -30,7 +30,8 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local env files (secretos como DATABASE_URL)
+.env
 .env*.local
 
 # typescript
@@ -39,3 +40,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+.neon
+
+.vercel
+.env*

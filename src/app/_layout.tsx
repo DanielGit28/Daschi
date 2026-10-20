@@ -6,6 +6,7 @@ import { AppState } from 'react-native';
 import { DATABASE_NAME, migrateDbIfNeeded } from '../lib/db';
 import { DogProvider } from '../lib/dog-context';
 import { syncReminders } from '../lib/notifications';
+import { SyncProvider } from '../lib/sync-context';
 import { colors } from '../lib/theme';
 
 // Los avisos de baño se programan para las próximas horas: al abrir o volver a la app se renuevan.
@@ -35,13 +36,15 @@ export default function RootLayout() {
   return (
     <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
       <DogProvider>
-        <ReminderSync />
-        <StatusBar style="light" />
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
-          <Stack.Screen name="leccion/[id]" options={detailHeader} />
-          <Stack.Screen name="ruta/[id]" options={detailHeader} />
-          <Stack.Screen name="socializacion" options={{ ...detailHeader, title: '' }} />
-        </Stack>
+        <SyncProvider>
+          <ReminderSync />
+          <StatusBar style="light" />
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+            <Stack.Screen name="leccion/[id]" options={detailHeader} />
+            <Stack.Screen name="ruta/[id]" options={detailHeader} />
+            <Stack.Screen name="socializacion" options={{ ...detailHeader, title: '' }} />
+          </Stack>
+        </SyncProvider>
       </DogProvider>
     </SQLiteProvider>
   );

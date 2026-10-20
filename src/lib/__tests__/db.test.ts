@@ -2,8 +2,8 @@
  * @jest-environment node
  */
 // Prueba la base de datos con SQLite real (sql.js), incluida la migración de los datos que ya hay en el teléfono.
-import type { SQLiteDatabase } from 'expo-sqlite';
-import initSqlJs, { type Database } from 'sql.js';
+import initSqlJs from 'sql.js';
+import { sqljsAdapter } from '../../test-utils/sqljs';
 import {
   createDog,
   exportAll,
@@ -23,41 +23,12 @@ jest.mock('expo-crypto', () => ({ randomUUID: () => require('crypto').randomUUID
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
-/** Adaptador mínimo de sql.js a la API async de expo-sqlite. */
-function adapter(sdb: Database): SQLiteDatabase {
-  const all = (sql: string, params: unknown[]) => {
-    const st = sdb.prepare(sql);
-    st.bind(params.flat() as never);
-    const rows: Record<string, unknown>[] = [];
-    while (st.step()) rows.push(st.getAsObject());
-    st.free();
-    return rows;
-  };
-  return {
-    execAsync: async (sql: string) => void sdb.exec(sql),
-    runAsync: async (sql: string, ...params: unknown[]) => {
-      sdb.run(sql, params.flat() as never);
-      return { lastInsertRowId: 0, changes: sdb.getRowsModified() };
-    },
-    getAllAsync: async (sql: string, ...params: unknown[]) => all(sql, params),
-    getFirstAsync: async (sql: string, ...params: unknown[]) => all(sql, params)[0] ?? null,
-    withTransactionAsync: async (fn: () => Promise<void>) => {
-      sdb.exec('BEGIN');
-      try {
-        await fn();
-        sdb.exec('COMMIT');
-      } catch (e) {
-        sdb.exec('ROLLBACK');
-        throw e;
-      }
-    },
-  } as unknown as SQLiteDatabase;
-}
-
 let SQL: Awaited<ReturnType<typeof initSqlJs>>;
 beforeAll(async () => {
   SQL = await initSqlJs();
 });
+
+const adapter = sqljsAdapter;
 
 /** Base en la versión 3 (la que hoy tiene el teléfono), con datos de ejemplo. */
 function v3WithData() {

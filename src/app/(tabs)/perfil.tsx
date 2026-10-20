@@ -10,6 +10,7 @@ import { deleteDog, exportAll, updateDog } from '../../lib/db';
 import { useDog } from '../../lib/dog-context';
 import { syncReminders } from '../../lib/notifications';
 import { activeGoals } from '../../lib/plan';
+import { useSync } from '../../lib/sync-context';
 import { colors } from '../../lib/theme';
 import { usePlan } from '../../lib/use-plan';
 
@@ -89,6 +90,8 @@ export default function Perfil() {
         <Button label="Cambiar respuestas" variant="secondary" onPress={() => router.push('/enfoques?editar=1')} />
       </Card>
 
+      <SyncCard />
+
       <Card>
         <H2>Respaldo</H2>
         <Muted>
@@ -112,6 +115,26 @@ export default function Perfil() {
 
       <Muted>Dachsi no reemplaza al veterinario. Ante cualquier duda de salud, consultá con tu veterinario.</Muted>
     </Screen>
+  );
+}
+
+function SyncCard() {
+  const { status, lastSyncAt, syncNow } = useSync();
+  const when = lastSyncAt ? lastSyncAt.toLocaleTimeString('es-CR', { hour: 'numeric', minute: '2-digit' }) : null;
+  const text =
+    status === 'syncing'
+      ? 'Sincronizando…'
+      : status === 'error'
+        ? 'Sin conexión con el servidor. Tus datos están guardados aquí y se suben cuando vuelva la conexión.'
+        : when
+          ? `Todo sincronizado (${when}).`
+          : 'Todavía no se sincronizó.';
+  return (
+    <Card>
+      <H2>☁️ Sincronización</H2>
+      <Muted>{text}</Muted>
+      <Button label="Sincronizar ahora" variant="secondary" onPress={syncNow} disabled={status === 'syncing'} />
+    </Card>
   );
 }
 

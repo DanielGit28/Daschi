@@ -1,0 +1,9 @@
+# Nunca subir secretos ni artefactos locales al deploy (Vercel compila desde cero).
+.env
+.env*.local
+.neon
+node_modules
+dist
+.expo
+.claude
+*.tsbuildinfo
