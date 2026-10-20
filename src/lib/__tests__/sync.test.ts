@@ -4,7 +4,7 @@
 // Dos dispositivos (SQLite real con sql.js) sincronizando contra el código real del servidor y el
 // driver real (node-postgres) sobre Postgres real (PGlite en otro proceso), con la migración de Neon.
 import { spawn, type ChildProcess } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { Pool } from 'pg';
 import { BadRequest, listDogs, parseSyncRequest, syncDog } from '../../server/sync';
@@ -17,7 +17,12 @@ jest.setTimeout(30_000);
 
 const ROOT = path.join(__dirname, '../../..');
 const PORT = 54329;
-const MIGRATION = readFileSync(path.join(ROOT, 'server/migrations/001_sync_tables.sql'), 'utf8');
+const MIGRATIONS_DIR = path.join(ROOT, 'server/migrations');
+const MIGRATION = readdirSync(MIGRATIONS_DIR)
+  .filter((f) => f.endsWith('.sql'))
+  .sort()
+  .map((f) => readFileSync(path.join(MIGRATIONS_DIR, f), 'utf8'))
+  .join('\n');
 
 let server: ChildProcess;
 let pool: Pool;
@@ -48,7 +53,7 @@ beforeEach(async () => {
 });
 
 const tick = () => new Promise((r) => setTimeout(r, 5));
-const OLI = { name: 'Olivia', breed: 'Dachshund (salchicha)', birth_date: '2026-08-24', weight_kg: 1.8 };
+const OLI = { name: 'Olivia', breed: 'Dachshund (salchicha)', birth_date: '2026-08-24', weight_kg: 1.8, sex: 'hembra' as const };
 const since = new Date('2026-01-01');
 
 async function twoDevices() {

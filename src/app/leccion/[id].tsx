@@ -54,7 +54,7 @@ export default function Leccion() {
   }
 
   const goal = goalById(lesson.goal);
-  const t = (text: string) => personalize(text, dog.name);
+  const t = (text: string) => personalize(text, dog);
 
   async function toggleDone() {
     if (!dog || !lesson) return;

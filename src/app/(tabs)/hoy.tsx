@@ -1,21 +1,28 @@
+import * as Haptics from 'expo-haptics';
 import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Mascot, Spots } from '../../components/Mascot';
-import { PottyRow, pottyLabel } from '../../components/PottyRow';
-import { Button, Card, CheckRow, H2, Muted, ProgressBar, Screen } from '../../components/ui';
+import { activityLabel, LogRow, pottyLabel, toEntries, type DayEntry } from '../../components/LogRow';
+import { Button, Card, CheckRow, Chip, H2, Muted, ProgressBar, Screen } from '../../components/ui';
 import { CONTENT, goalById, personalize, type Lesson } from '../../content';
 import { ageLabel, parseISODate, stageForWeeks } from '../../lib/age';
 import {
+  addActivityLog,
   addPottyLog,
   addSocializationLog,
+  deleteActivityLog,
   deletePottyLog,
+  getActivityLogsSince,
+  getLastActivity,
   getLastPottyLog,
   getPottyLogsSince,
   getReminders,
   setItemDone,
   updateReminder,
+  type ActivityKind,
+  type ActivityLog,
   type PottyKind,
   type PottyLog,
   type PottyPlace,
@@ -24,7 +31,7 @@ import {
 import { useDog } from '../../lib/dog-context';
 import { syncReminders } from '../../lib/notifications';
 import { activeGoals, dayKey, pottyAdvice, socializationPicks, tipOfDay, todayLessons } from '../../lib/plan';
-import { parseTime, pottyStatus } from '../../lib/schedule';
+import { AFTER_MEAL_MIN, parseTime, pottyStatus, routineHint } from '../../lib/schedule';
 import { colors, radius, space } from '../../lib/theme';
 import { usePlan, type PlanState } from '../../lib/use-plan';
 
@@ -34,17 +41,26 @@ function startOfToday() {
 }
 
 const UNDO_MS = 8000;
+/** "¿Cuándo pasó?": para registrar después de entrar con el cachorro en brazos. */
+const AGO_OPTIONS = [0, 5, 10, 15, 30];
+
+function tapFeedback() {
+  if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+}
 
 export default function Hoy() {
   const db = useSQLiteContext();
   const { dog } = useDog();
   const { state: plan, reload: reloadPlan } = usePlan(dog);
   const [logs, setLogs] = useState<PottyLog[]>([]);
+  const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [lastLog, setLastLog] = useState<PottyLog | null>(null);
+  const [lastActivity, setLastActivity] = useState<ActivityLog | null>(null);
+  const [ago, setAgo] = useState(0);
   const [pottyReminder, setPottyReminder] = useState<Reminder | null>(null);
   const [now, setNow] = useState(() => new Date());
   // Último toque, para poder deshacerlo durante unos segundos.
-  const [undo, setUndo] = useState<{ id: string; label: string } | null>(null);
+  const [undo, setUndo] = useState<{ id: string; type: DayEntry['type']; label: string } | null>(null);
 
   useEffect(() => {
     if (!undo) return;
@@ -54,13 +70,17 @@ export default function Hoy() {
 
   const load = useCallback(async () => {
     if (!dog) return;
-    const [today, last, reminders] = await Promise.all([
+    const [today, todayActivities, last, lastAct, reminders] = await Promise.all([
       getPottyLogsSince(db, dog.id, startOfToday()),
+      getActivityLogsSince(db, dog.id, startOfToday()),
       getLastPottyLog(db, dog.id),
+      getLastActivity(db, dog.id),
       getReminders(db, dog.id),
     ]);
     setLogs(today);
+    setActivities(todayActivities);
     setLastLog(last);
+    setLastActivity(lastAct);
     setPottyReminder(reminders.find((r) => r.interval_min != null) ?? null);
     setNow(new Date());
   }, [db, dog]);
@@ -77,23 +97,38 @@ export default function Hoy() {
   if (!dog || !plan) return null;
 
   const stage = stageForWeeks(plan.profile.weeks);
-  const t = (text: string) => personalize(text, dog.name);
+  const t = (text: string) => personalize(text, dog);
   const lessons = todayLessons(plan.profile, plan.progress, CONTENT, now);
   const tip = tipOfDay(plan.profile, CONTENT, now);
   const outside = logs.filter((l) => l.place === 'fuera').length;
   const inside = logs.filter((l) => l.place === 'dentro').length;
 
+  const when = () => new Date(Date.now() - ago * 60_000);
+
   async function log(kind: PottyKind, place: PottyPlace) {
     if (!dog) return;
-    const id = await addPottyLog(db, dog.id, kind, place);
-    setUndo({ id, label: pottyLabel({ kind, place }) });
+    tapFeedback();
+    const id = await addPottyLog(db, dog.id, kind, place, when());
+    setUndo({ id, type: 'potty', label: pottyLabel({ kind, place }) });
+    setAgo(0);
     await load();
     await syncReminders(db); // la próxima salida se cuenta desde este registro
   }
 
-  async function remove(id: string) {
+  async function logActivity(kind: ActivityKind) {
+    if (!dog) return;
+    tapFeedback();
+    const id = await addActivityLog(db, dog.id, kind, when());
+    setUndo({ id, type: 'activity', label: activityLabel(kind) });
+    setAgo(0);
+    await load();
+    await syncReminders(db); // después de comer se programa una salida
+  }
+
+  async function remove(entry: Pick<DayEntry, 'id' | 'type'>) {
     setUndo(null);
-    await deletePottyLog(db, id);
+    if (entry.type === 'potty') await deletePottyLog(db, entry.id);
+    else await deleteActivityLog(db, entry.id);
     await load();
     await syncReminders(db);
   }
@@ -155,13 +190,18 @@ export default function Hoy() {
         </View>
       </Card>
 
-      <NextOuting reminder={pottyReminder} lastLog={lastLog} now={now} />
+      <NextOuting reminder={pottyReminder} lastLog={lastLog} lastActivity={lastActivity} now={now} />
 
       <Card>
-        <H2>Baño</H2>
+        <H2>Registro rápido</H2>
         <View style={styles.row}>
           <Stat value={outside} label="afuera" color={colors.success} />
           <Stat value={inside} label="accidentes" color={colors.accent} />
+        </View>
+        <View style={styles.ago}>
+          {AGO_OPTIONS.map((m) => (
+            <Chip key={m} label={m === 0 ? 'Ahora' : `hace ${m}′`} selected={ago === m} onPress={() => setAgo(m)} />
+          ))}
         </View>
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
@@ -179,20 +219,27 @@ export default function Hoy() {
             <Button label="Popó adentro" variant="secondary" onPress={() => log('popo', 'dentro')} />
           </View>
         </View>
+        <View style={styles.row}>
+          {(['comida', 'dormir', 'despertar'] as const).map((k) => (
+            <View key={k} style={{ flex: 1 }}>
+              <Button label={activityLabel(k)} variant="secondary" onPress={() => logActivity(k)} />
+            </View>
+          ))}
+        </View>
         {undo ? (
           <View style={styles.undo}>
             <Text style={styles.undoText}>{undo.label} registrado</Text>
-            <Pressable onPress={() => remove(undo.id)} hitSlop={10} accessibilityRole="button">
+            <Pressable onPress={() => remove(undo)} hitSlop={10} accessibilityRole="button">
               <Text style={styles.undoAction}>Deshacer</Text>
             </Pressable>
           </View>
         ) : null}
-        {logs.length === 0 ? (
+        {logs.length + activities.length === 0 ? (
           <Muted>Todavía no hay registros hoy.</Muted>
         ) : (
           <View>
-            {logs.map((l) => (
-              <PottyRow key={l.id} log={l} onDelete={(x) => remove(x.id)} />
+            {toEntries(logs, activities).map((e) => (
+              <LogRow key={e.id} entry={e} onDelete={remove} />
             ))}
           </View>
         )}
@@ -305,7 +352,27 @@ function TipCard({ text }: { text: string }) {
   );
 }
 
-function NextOuting({ reminder, lastLog, now }: { reminder: Reminder | null; lastLog: PottyLog | null; now: Date }) {
+type NextOutingProps = { reminder: Reminder | null; lastLog: PottyLog | null; lastActivity: ActivityLog | null; now: Date };
+
+function NextOuting({ reminder, lastLog, lastActivity, now }: NextOutingProps) {
+  const clock = (d: Date) => d.toLocaleTimeString('es-CR', { hour: 'numeric', minute: '2-digit' });
+  const hint = routineHint(lastActivity, lastLog, now);
+  if (hint) {
+    const [title, detail, urgent] =
+      hint.kind === 'sleeping'
+        ? ['😴 Durmiendo', `Desde las ${clock(hint.since)}. Al despertar, directo afuera.`, false]
+        : hint.kind === 'woke'
+          ? ['☀️ Se despertó: ¡afuera ya!', 'Es uno de los momentos en que casi nunca falla.', true]
+          : hint.due
+            ? ['🚪 ¡Ya toca salir!', `Comió a las ${clock(new Date(hint.outingAt.getTime() - AFTER_MEAL_MIN * 60_000))}.`, true]
+            : [`🍽️ Salida a las ${clock(hint.outingAt)}`, 'Unos 15 minutos después de comer.', false];
+    return (
+      <Card style={urgent ? styles.overdue : undefined}>
+        <Text style={styles.nextTitle}>{title}</Text>
+        <Muted>{detail}</Muted>
+      </Card>
+    );
+  }
   if (!reminder?.enabled || !reminder.interval_min) {
     return (
       <Pressable onPress={() => router.push('/recordatorios')}>
@@ -323,7 +390,6 @@ function NextOuting({ reminder, lastLog, now }: { reminder: Reminder | null; las
     quietStart: parseTime(reminder.quiet_start),
     quietEnd,
   });
-  const clock = (d: Date) => d.toLocaleTimeString('es-CR', { hour: 'numeric', minute: '2-digit' });
   const inMin = next ? Math.max(0, Math.round((next.getTime() - now.getTime()) / 60000)) : null;
 
   let title: string;
@@ -362,6 +428,7 @@ const styles = StyleSheet.create({
   switchDogText: { fontSize: 14, fontWeight: '700', color: colors.accent },
   age: { fontSize: 20, fontWeight: '700', color: colors.text },
   row: { flexDirection: 'row', gap: space.sm },
+  ago: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs },
   undo: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -27,7 +27,7 @@
 
   { "id": "t-caso-1", "goal": "caso", "text": "Sesiones cortas ganan: 5 minutos, 2 o 3 veces al día, y terminá siempre con algo que le salga bien." },
   { "id": "t-caso-2", "goal": "caso", "household": "familia", "text": "Todos en casa deben usar exactamente la misma palabra para cada señal: \"ven\" no es lo mismo que \"vení acá\"." },
-  { "id": "t-caso-3", "goal": "caso", "text": "Decí cada señal una sola vez. Si no responde, ayudalo con la mano o el premio en vez de repetir." },
+  { "id": "t-caso-3", "goal": "caso", "text": "Decí cada señal una sola vez. Si no responde, ayuda{lo} con la mano o el premio en vez de repetir." },
   { "id": "t-caso-4", "goal": "caso", "breeds": ["dachs", "salchich", "teckel"], "text": "Las salchichas son listas pero independientes: premios de alto valor y convertir todo en juego funciona mejor que insistir." },
 
   { "id": "t-solo-1", "goal": "solo", "text": "Salidas y llegadas aburridas: sin despedidas largas ni saludos eufóricos. Así irte y volver no es un evento." },

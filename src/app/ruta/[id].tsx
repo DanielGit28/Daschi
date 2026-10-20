@@ -26,7 +26,7 @@ export default function Ruta() {
   const lessons = routeLessons(goal.id, CONTENT.lessons);
   const achieved = lessons.filter((l) => progress.achieved.has(l.id)).length;
   const tips = goalTips(goal.id, profile, CONTENT.tips);
-  const t = (text: string) => personalize(text, dog.name);
+  const t = (text: string) => personalize(text, dog);
 
   return (
     <Screen underHeader>

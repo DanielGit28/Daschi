@@ -30,7 +30,10 @@ export type Dog = SyncFields & {
   household: Household | null;
   /** 1 cuando ya respondió las preguntas de enfoques. */
   setup_done: number;
+  sex: Sex | null;
 };
+
+export type Sex = 'macho' | 'hembra';
 
 export type PottyKind = 'pipi' | 'popo';
 export type PottyPlace = 'fuera' | 'dentro';
@@ -83,7 +86,7 @@ export type SocializationLog = SyncFields & {
 export const DEFAULT_QUIET_START = '22:00';
 export const DEFAULT_QUIET_END = '06:00';
 
-const DATABASE_VERSION = 4;
+const DATABASE_VERSION = 5;
 
 const now = () => new Date().toISOString();
 
@@ -268,6 +271,19 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
     current = 4;
   }
 
+  if (current < 5) {
+    await db.execAsync(`
+      ALTER TABLE dogs ADD COLUMN sex TEXT;
+
+      CREATE TABLE activity_logs (
+        id TEXT PRIMARY KEY, dog_id TEXT NOT NULL, kind TEXT NOT NULL, logged_at TEXT NOT NULL, note TEXT,
+        updated_at TEXT NOT NULL, deleted INTEGER NOT NULL DEFAULT 0, dirty INTEGER NOT NULL DEFAULT 1
+      );
+      CREATE INDEX idx_activity_dog_time ON activity_logs(dog_id, logged_at);
+    `);
+    current = 5;
+  }
+
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
 
@@ -322,6 +338,7 @@ export type DogInput = {
   breed: string;
   birth_date: string;
   weight_kg: number | null;
+  sex: Sex | null;
 };
 
 export async function createDog(db: SQLiteDatabase, input: DogInput) {
@@ -416,6 +433,43 @@ export function getSocializationLogs(db: SQLiteDatabase, dogId: string) {
 
 export async function deleteSocializationLog(db: SQLiteDatabase, id: string) {
   await softDelete(db, 'socialization_logs', id);
+}
+
+// ---------- Comida y siesta ----------
+
+export type ActivityKind = 'comida' | 'dormir' | 'despertar';
+
+export type ActivityLog = SyncFields & {
+  id: string;
+  dog_id: string;
+  kind: ActivityKind;
+  logged_at: string;
+  note: string | null;
+};
+
+export async function addActivityLog(db: SQLiteDatabase, dogId: string, kind: ActivityKind, at: Date = new Date()) {
+  const id = randomUUID();
+  await upsert(db, 'activity_logs', { id, dog_id: dogId, kind, logged_at: at.toISOString(), note: null });
+  return id;
+}
+
+export function getActivityLogsSince(db: SQLiteDatabase, dogId: string, since: Date) {
+  return db.getAllAsync<ActivityLog>(
+    'SELECT * FROM activity_logs WHERE dog_id = ? AND logged_at >= ? AND deleted = 0 ORDER BY logged_at DESC',
+    dogId,
+    since.toISOString(),
+  );
+}
+
+export function getLastActivity(db: SQLiteDatabase, dogId: string) {
+  return db.getFirstAsync<ActivityLog>(
+    'SELECT * FROM activity_logs WHERE dog_id = ? AND deleted = 0 ORDER BY logged_at DESC LIMIT 1',
+    dogId,
+  );
+}
+
+export async function deleteActivityLog(db: SQLiteDatabase, id: string) {
+  await softDelete(db, 'activity_logs', id);
 }
 
 // ---------- Registros de baño ----------

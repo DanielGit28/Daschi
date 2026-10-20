@@ -32,11 +32,11 @@
     "needs": ["Premios", "Paciencia", "Dachsi abierto para registrar"],
     "steps": [
       { "text": "Al llegar, llevá a {nombre} directo al lugar del baño y esperá unos minutos en silencio.", "next": "Si hace, premio y fiesta suave en ese mismo momento." },
-      { "text": "Dejá que explore su zona a su ritmo. Nada de visitas ni presentaciones el primer día.", "next": "Cuando se vea curioso y no escondido." },
+      { "text": "Dejá que explore su zona a su ritmo. Nada de visitas ni presentaciones el primer día.", "next": "Cuando se vea curios{o} y no escondid{o}." },
       { "text": "Salidas al baño al despertar, después de comer, después de jugar y cada 45-60 minutos.", "next": "Usá los recordatorios de la pestaña Avisos." },
       { "text": "Mucha siesta: un cachorro duerme 18 a 20 horas al día. Si está pasado de vueltas, necesita dormir.", "next": "Cuando duerma en su espacio sin que lo cargues." }
     ],
-    "mistakes": ["Invitar a toda la familia a conocerlo el primer día.", "Despertarlo para jugar."],
+    "mistakes": ["Invitar a toda la familia a conocer{lo} el primer día.", "Despertar{lo} para jugar."],
     "doneWhen": "Terminó el día con rutina de baño y siestas."
   },
   {
@@ -52,10 +52,10 @@
     "steps": [
       { "text": "Poné su cama o guacal junto a tu cama: oírte y olerte lo calma.", "next": "Más adelante se puede mover de a poco." },
       { "text": "Última salida al baño justo antes de dormir, tranquila y sin juego.", "next": "Cuando haga, directo a la cama." },
-      { "text": "Si llora, primero pensá en baño: sacalo en brazos, en silencio, y volvé a la cama sin fiesta.", "next": "Si ya hizo y sigue llorando, consolá con tu mano y voz bajita." },
+      { "text": "Si llora, primero pensá en baño: saca{lo} en brazos, en silencio, y volvé a la cama sin fiesta.", "next": "Si ya hizo y sigue llorando, consolá con tu mano y voz bajita." },
       { "text": "Planeá 1 o 2 salidas de madrugada las primeras semanas (podés crear un aviso a hora fija).", "next": "Se van espaciando a medida que crece." }
     ],
-    "mistakes": ["Dejarlo llorar solo en otro cuarto la primera noche.", "Convertir la salida nocturna en hora de juego."],
+    "mistakes": ["Dejar{lo} llorar sol{o} en otro cuarto la primera noche.", "Convertir la salida nocturna en hora de juego."],
     "doneWhen": "Duerme tramos de 3 a 4 horas cerca de vos."
   },
   {
@@ -87,7 +87,7 @@
     "purpose": "Que un accidente no se repita en el mismo lugar ni dañe la confianza.",
     "needs": ["Limpiador enzimático", "Papel o toallas"],
     "steps": [
-      { "text": "Si lo agarrás en el acto: sin gritos, alzalo con calma y llevalo afuera.", "next": "Si termina afuera, premio." },
+      { "text": "Si lo agarrás en el acto: sin gritos, alza{lo} con calma y lleva{lo} afuera.", "next": "Si termina afuera, premio." },
       { "text": "Si lo encontrás después: no le digas nada, ya no lo puede conectar.", "next": "Limpiá." },
       { "text": "Limpiá con limpiador enzimático. El cloro y el amoníaco dejan olor que invita a repetir.", "next": "Cuando no quede olor." },
       { "text": "Registrá el accidente en Hoy: sirve para ver patrones (¿después de comer? ¿tras 1 hora?).", "next": "Si se repite a la misma hora, adelantá esa salida." }
@@ -124,13 +124,13 @@
     "purpose": "Que la aspiradora, el tráfico o una tormenta no den miedo de grande.",
     "needs": ["Teléfono con sonidos (tráfico, tormenta, timbre, niños)", "Premios"],
     "steps": [
-      { "text": "Poné un sonido muy bajito mientras {nombre} come o juega.", "next": "Si sigue tranquilo, pasá al siguiente paso." },
+      { "text": "Poné un sonido muy bajito mientras {nombre} come o juega.", "next": "Si sigue tranquil{o}, pasá al siguiente paso." },
       { "text": "Cada vez que suene, premio. Sonido = cosas buenas.", "next": "Cuando mire el teléfono y luego a vos esperando premio." },
       { "text": "Subí un poquito el volumen en otra sesión, nunca en la misma.", "next": "Si se asusta, volvé al volumen anterior." },
       { "text": "Marcá el sonido en la lista de socialización con su reacción.", "next": "Mañana, otro sonido." }
     ],
     "mistakes": ["Empezar con volumen alto.", "Seguir cuando ya mostró miedo (orejas atrás, cola baja, se esconde)."],
-    "doneWhen": "Come tranquilo con el sonido a volumen normal."
+    "doneWhen": "Come tranquil{o} con el sonido a volumen normal."
   },
   {
     "id": "soc-superficies",
@@ -143,11 +143,11 @@
     "purpose": "Que pisar cerámica, grama, metal o una alfombra rara no sea un drama.",
     "needs": ["Premios", "Toalla, cartón, bandeja de metal, plástico de burbujas"],
     "steps": [
-      { "text": "Poné la superficie en el suelo y dejá premios cerca, sin empujar a {nombre}.", "next": "Cuando se acerque solo." },
+      { "text": "Poné la superficie en el suelo y dejá premios cerca, sin empujar a {nombre}.", "next": "Cuando se acerque sol{o}." },
       { "text": "Premios sobre la superficie: que decida pisarla.", "next": "Cuando ponga las cuatro patas encima." },
       { "text": "Fiesta suave y terminá. Una superficie nueva por sesión.", "next": "Marcá la superficie en la lista de socialización." }
     ],
-    "mistakes": ["Ponerlo encima a la fuerza.", "Usar superficies que se mueven mucho o resbalan."],
+    "mistakes": ["Poner{lo} encima a la fuerza.", "Usar superficies que se mueven mucho o resbalan."],
     "doneWhen": "Pisa 5 superficies distintas sin dudar."
   },
   {
@@ -179,11 +179,11 @@
     "purpose": "Ver la calle, carros y gente antes de las vacunas completas, sin pisar el suelo.",
     "needs": ["Brazos o un bolso de transporte", "Premios"],
     "steps": [
-      { "text": "Salí con {nombre} en brazos a la acera o a un parque, 5 minutos.", "next": "Si está tranquilo, premio cada cosa nueva que mire." },
+      { "text": "Salí con {nombre} en brazos a la acera o a un parque, 5 minutos.", "next": "Si está tranquil{o}, premio cada cosa nueva que mire." },
       { "text": "Mirá juntos: carros, bicicletas, perros a distancia, niños jugando.", "next": "Si tiembla o se esconde, alejate un poco." },
       { "text": "También vale el carro: viajes cortos que terminen en algo bueno.", "next": "Marcá los lugares en la lista de socialización." }
     ],
-    "mistakes": ["Ponerlo en el suelo de la calle antes de que el veterinario lo autorice.", "Lugares muy ruidosos al principio."],
+    "mistakes": ["Poner{lo} en el suelo de la calle antes de que el veterinario lo autorice.", "Lugares muy ruidosos al principio."],
     "doneWhen": "Mira el mundo con curiosidad y acepta premios afuera.",
     "dachshund": "Al cargar, sostené siempre pecho y cadera a la vez: la espalda no debe quedar colgando."
   },
@@ -195,13 +195,13 @@
     "minWeeks": 0,
     "order": 24,
     "purpose": "Que revisiones, cortar uñas y el veterinario sean normales.",
-    "needs": ["Premios", "Un momento en que esté cansado y tranquilo"],
+    "needs": ["Premios", "Un momento en que esté cansad{o} y tranquil{o}"],
     "steps": [
       { "text": "Tocá una pata 1 segundo y premio. Soltá antes de que retire la pata.", "next": "Cuando no la retire, pasá a 2-3 segundos." },
-      { "text": "Lo mismo con orejas: tocar, mirar dentro, premio.", "next": "Cuando se quede quieto." },
+      { "text": "Lo mismo con orejas: tocar, mirar dentro, premio.", "next": "Cuando se quede quiet{o}." },
       { "text": "Levantá suavemente el labio para ver los dientes, premio.", "next": "Una zona nueva cada sesión." }
     ],
-    "mistakes": ["Sujetarlo a la fuerza.", "Hacerlo cuando está muy activo."],
+    "mistakes": ["Sujetar{lo} a la fuerza.", "Hacerlo cuando está muy activo."],
     "doneWhen": "Deja tocar patas, orejas y boca 5 segundos cada una sin retirarse."
   },
   {
@@ -233,11 +233,11 @@
     "needs": ["2 o 3 juguetes distintos a mano, en cada cuarto"],
     "steps": [
       { "text": "Tené un juguete siempre a mano. Cuando vaya por tus manos o tobillos, mové el juguete.", "next": "Cuando lo agarre, elogiá." },
-      { "text": "Rotá juguetes cada día para que sigan siendo interesantes.", "next": "Cuando lo busque solo." },
+      { "text": "Rotá juguetes cada día para que sigan siendo interesantes.", "next": "Cuando lo busque sol{o}." },
       { "text": "Si está muy mordelón, suele ser cansancio: siesta en su espacio.", "next": "Registrá a qué hora pasa más." }
     ],
     "mistakes": ["Dejar todos los juguetes siempre en el suelo (se aburren).", "Confundir cansancio con mala conducta."],
-    "doneWhen": "Busca un juguete solo cuando tiene ganas de morder."
+    "doneWhen": "Busca un juguete por su cuenta cuando tiene ganas de morder."
   },
   {
     "id": "mord-denticion",
@@ -267,12 +267,12 @@
     "needs": ["Guacal con cobija", "Premios", "Un juguete para lamer o morder"],
     "steps": [
       { "text": "Dejá la puerta abierta y tirá premios adentro. Que entre y salga cuando quiera.", "next": "Cuando entre sin dudar." },
-      { "text": "Dale la comida adentro del guacal, con la puerta abierta.", "next": "Cuando coma tranquilo adentro." },
+      { "text": "Dale la comida adentro del guacal, con la puerta abierta.", "next": "Cuando coma tranquil{o} adentro." },
       { "text": "Cerrá la puerta unos segundos mientras come o mastica, y abrí antes de que proteste.", "next": "Subí de a poco: 10 s, 30 s, 1 min, 5 min." },
       { "text": "Siestas en el guacal con vos cerca.", "next": "Cuando duerma ahí sin llorar." }
     ],
     "mistakes": ["Usarlo como castigo.", "Dejarlo encerrado más tiempo del que aguanta sin ir al baño."],
-    "doneWhen": "Entra solo al guacal y duerme ahí una siesta completa.",
+    "doneWhen": "Entra sol{o} al guacal y duerme ahí una siesta completa.",
     "dachshund": "A las salchichas les encantan las cuevas: una cobija para meterse debajo ayuda mucho."
   },
   {
@@ -324,7 +324,7 @@
       { "text": "Ahora sin premio en la mano: esperá a que te mire.", "next": "Cuando lo haga en menos de 3 segundos." },
       { "text": "Sumá la palabra \"mirame\" justo antes.", "next": "Cuando mire al oír la palabra 8 de 10 veces." }
     ],
-    "mistakes": ["Mirarlo fijo con cara seria (puede sentirlo como amenaza)."],
+    "mistakes": ["Mirar{lo} fijo con cara seria (puede sentirlo como amenaza)."],
     "doneWhen": "Te mira al decir \"mirame\" 8 de 10 veces."
   },
   {
@@ -359,9 +359,9 @@
     "steps": [
       { "text": "Agachate a 1-2 metros, decí \"{nombre}, ven\" con voz feliz y abrí los brazos.", "next": "Cuando llegue, fiesta y premio especial." },
       { "text": "Juego de ping-pong entre dos personas en el mismo cuarto.", "next": "Cuando venga rápido 8 de 10 veces." },
-      { "text": "Aumentá la distancia o llamalo desde otro cuarto.", "next": "Cuando venga sin dudar." }
+      { "text": "Aumentá la distancia o llama{lo} desde otro cuarto.", "next": "Cuando venga sin dudar." }
     ],
-    "mistakes": ["Llamarlo para algo que no le gusta (bañarlo, encerrarlo).", "Perseguirlo si no viene: corré en la dirección opuesta."],
+    "mistakes": ["Llamar{lo} para algo que no le gusta (bañar{lo}, encerrar{lo}).", "Perseguir{lo} si no viene: corré en la dirección opuesta."],
     "doneWhen": "Viene desde otro cuarto 8 de 10 veces."
   },
   {
@@ -389,15 +389,15 @@
     "title": "Ratitos a solas",
     "minWeeks": 0,
     "order": 60,
-    "purpose": "Que quedarse solo sea normal desde chiquito y no aparezca la ansiedad.",
+    "purpose": "Que quedarse sol{o} sea normal desde chiquito y no aparezca la ansiedad.",
     "needs": ["Su espacio o guacal", "Algo rico para masticar"],
     "steps": [
       { "text": "Dale algo para masticar en su espacio y salí del cuarto 10 segundos.", "next": "Volvé antes de que llore, sin saludos efusivos." },
       { "text": "Subí de a poco: 30 s, 1 min, 3 min, 5 min.", "next": "Si llora, la próxima vez volvé al tiempo anterior." },
-      { "text": "Practicá también cuando vos estás en casa haciendo tus cosas.", "next": "Cuando se quede tranquilo 10 minutos." }
+      { "text": "Practicá también cuando vos estás en casa haciendo tus cosas.", "next": "Cuando se quede tranquil{o} 10 minutos." }
     ],
     "mistakes": ["Pasar el día entero pegado y luego salir 4 horas de golpe.", "Despedidas y regresos dramáticos."],
-    "doneWhen": "Se queda tranquilo 15 minutos solo en su espacio.",
+    "doneWhen": "Se queda tranquil{o} 15 minutos sol{o} en su espacio.",
     "dachshund": "Las salchichas se apegan mucho a una persona: este enfoque es especialmente importante."
   },
   {
@@ -411,12 +411,12 @@
     "needs": ["Arnés en forma de H o Y (no presiona el cuello)", "Premios"],
     "steps": [
       { "text": "Mostrá el arnés y premio. Repetí 5 veces.", "next": "Cuando mire el arnés con interés." },
-      { "text": "Pasá el arnés por la cabeza (o la parte que corresponda) y premio, sin abrochar.", "next": "Cuando se quede quieto." },
+      { "text": "Pasá el arnés por la cabeza (o la parte que corresponda) y premio, sin abrochar.", "next": "Cuando se quede quiet{o}." },
       { "text": "Abrochá, premios, jugá 1 minuto y quitalo.", "next": "Subí el tiempo con el arnés puesto." },
       { "text": "Enganchá la correa y dejá que la arrastre bajo supervisión en casa.", "next": "Cuando la ignore." }
     ],
-    "mistakes": ["Ponérselo a la fuerza y salir de una vez a la calle.", "Collar solo para pasear (presiona el cuello)."],
-    "doneWhen": "Se queda quieto y contento mientras le ponés el arnés.",
+    "mistakes": ["Ponérse{lo} a la fuerza y salir de una vez a la calle.", "Collar solo para pasear (presiona el cuello)."],
+    "doneWhen": "Se queda quiet{o} y content{o} mientras le ponés el arnés.",
     "dachshund": "En salchichas siempre arnés para pasear: proteger cuello y espalda."
   },
   {
@@ -444,14 +444,14 @@
     "title": "Premiar la calma",
     "minWeeks": 0,
     "order": 80,
-    "purpose": "Que estar tranquilo reciba más atención que ladrar.",
+    "purpose": "Que estar tranquil{o} reciba más atención que ladrar.",
     "needs": ["Premios en un frasco a mano"],
     "steps": [
-      { "text": "Durante el día, cuando esté echado y callado, dejá un premio entre sus patas sin decir nada.", "next": "Hacelo 10 veces al día." },
+      { "text": "Durante el día, cuando esté echad{o} y callad{o}, dejá un premio entre sus patas sin decir nada.", "next": "Hacelo 10 veces al día." },
       { "text": "Si ladra para pedir atención, mirá para otro lado hasta 3 segundos de silencio.", "next": "En el silencio, atención y premio." },
-      { "text": "Anotá a qué le ladra: timbre, gente, estar solo.", "next": "Eso dice qué trabajar después." }
+      { "text": "Anotá a qué le ladra: timbre, gente, estar sol{o}.", "next": "Eso dice qué trabajar después." }
     ],
-    "mistakes": ["Gritarle \"¡callate!\": para el perro estás ladrando con él.", "Atenderlo solo cuando ladra."],
+    "mistakes": ["Gritarle \"¡callate!\": para el perro estás ladrando con él.", "Atender{lo} solo cuando ladra."],
     "doneWhen": "Ladra menos para pedir atención que la semana anterior."
   },
   {
@@ -480,12 +480,12 @@
     "title": "Toque con la nariz",
     "minWeeks": 9,
     "order": 90,
-    "purpose": "El truco más útil: guiarlo a cualquier lugar con tu mano.",
+    "purpose": "El truco más útil: guiar{lo} a cualquier lugar con tu mano.",
     "needs": ["Premios"],
     "steps": [
       { "text": "Poné la palma abierta a 5 cm de su nariz.", "next": "Cuando la toque con la nariz, \"¡sí!\" y premio." },
       { "text": "Cambiá la mano de lugar: un poco a un lado, más arriba, más abajo.", "next": "Cuando la toque 8 de 10 veces." },
-      { "text": "Decí \"toca\" antes de mostrar la mano.", "next": "Usalo para moverlo sin jalarlo." }
+      { "text": "Decí \"toca\" antes de mostrar la mano.", "next": "Usalo para mover{lo} sin jalar{lo}." }
     ],
     "mistakes": ["Mover la mano hacia su nariz (que venga él)."],
     "doneWhen": "Toca la mano al oír \"toca\" 8 de 10 veces."
@@ -555,10 +555,10 @@
     "needs": ["Cortaúñas o lima", "Premios de alto valor"],
     "steps": [
       { "text": "Mostrá el cortaúñas y premio. Tocá una pata con el cortaúñas y premio.", "next": "Cuando no retire la pata." },
-      { "text": "Apoyá el cortaúñas sobre una uña sin cortar, premio.", "next": "Cuando se quede quieto." },
+      { "text": "Apoyá el cortaúñas sobre una uña sin cortar, premio.", "next": "Cuando se quede quiet{o}." },
       { "text": "Cortá solo la puntita de una uña y fiesta. Una o dos uñas por día está bien.", "next": "Si no sabés dónde cortar, pedí que te enseñen en la veterinaria." }
     ],
-    "mistakes": ["Cortar todas las uñas de una vez sujetándolo.", "Cortar muy al ras (duele y sangra)."],
+    "mistakes": ["Cortar todas las uñas de una vez sujetándo{lo}.", "Cortar muy al ras (duele y sangra)."],
     "doneWhen": "Deja cortar una uña sin retirar la pata."
   },
   {
@@ -590,7 +590,7 @@
     "needs": ["Rampa con superficie antideslizante", "Premios"],
     "steps": [
       { "text": "Poné la rampa en el suelo plana y premiá cada pata que ponga encima.", "next": "Cuando la cruce caminando." },
-      { "text": "Apoyala a poca altura (un escalón) y guiala con premios.", "next": "Cuando suba y baje tranquila." },
+      { "text": "Apoyala a poca altura (un escalón) y guia{lo} con premios.", "next": "Cuando suba y baje tranquil{o}." },
       { "text": "Colocala en el sillón y bloqueá las otras formas de subir.", "next": "Premiá cada vez que la use." }
     ],
     "mistakes": ["Rampas resbalosas o muy empinadas.", "Permitir saltar \"solo esta vez\"."],

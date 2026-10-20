@@ -1,7 +1,7 @@
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { timeLabel } from '../components/PottyRow';
+import { timeLabel } from '../components/LogRow';
 import { Button, Card, Muted, ProgressBar, Screen } from '../components/ui';
 import { CONTENT } from '../content';
 import { addSocializationLog, deleteSocializationLog, type Reaction } from '../lib/db';

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { ageInDays, formatHumanDate, parseHumanDate } from '../lib/age';
-import type { Dog, DogInput } from '../lib/db';
+import type { Dog, DogInput, Sex } from '../lib/db';
 import { colors, radius, space } from '../lib/theme';
-import { Button } from './ui';
+import { Button, Chip } from './ui';
 
 type Props = {
   initial?: Dog | null;
@@ -16,6 +16,7 @@ export function DogForm({ initial, submitLabel, onSubmit }: Props) {
   const [breed, setBreed] = useState(initial?.breed ?? 'Dachshund (salchicha)');
   const [birth, setBirth] = useState(initial ? formatHumanDate(initial.birth_date) : '');
   const [weight, setWeight] = useState(initial?.weight_kg != null ? String(initial.weight_kg) : '');
+  const [sex, setSex] = useState<Sex | null>(initial?.sex ?? null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -36,6 +37,7 @@ export function DogForm({ initial, submitLabel, onSubmit }: Props) {
         breed: breed.trim() || 'Dachshund (salchicha)',
         birth_date: birthISO,
         weight_kg: weightNum,
+        sex,
       });
     } finally {
       setSaving(false);
@@ -46,6 +48,12 @@ export function DogForm({ initial, submitLabel, onSubmit }: Props) {
     <View style={styles.form}>
       <Field label="Nombre">
         <TextInput placeholderTextColor={colors.textMuted} keyboardAppearance="dark" style={styles.input} value={name} onChangeText={setName} placeholder="Ej. Canela" autoCapitalize="words" returnKeyType="next" />
+      </Field>
+      <Field label="¿Macho o hembra?">
+        <View style={styles.chips}>
+          <Chip label="♀ Hembra" selected={sex === 'hembra'} onPress={() => setSex('hembra')} />
+          <Chip label="♂ Macho" selected={sex === 'macho'} onPress={() => setSex('macho')} />
+        </View>
       </Field>
       <Field label="Raza">
         <TextInput placeholderTextColor={colors.textMuted} keyboardAppearance="dark" style={styles.input} value={breed} onChangeText={setBreed} />
@@ -84,6 +92,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 const styles = StyleSheet.create({
   form: { gap: space.md },
+  chips: { flexDirection: 'row', gap: space.sm },
   label: { fontSize: 14, fontWeight: '600', color: colors.textMuted },
   input: {
     backgroundColor: colors.surface,

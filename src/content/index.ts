@@ -89,7 +89,14 @@ export const CONTENT: Content = {
 export const goalById = (id: string) => CONTENT.goals.find((g) => g.id === id);
 export const lessonById = (id: string) => CONTENT.lessons.find((l) => l.id === id);
 
-/** Reemplaza {nombre} por el nombre del cachorro. */
-export function personalize(text: string, dogName: string) {
-  return text.replaceAll('{nombre}', dogName);
+/**
+ * Adapta el texto al cachorro: {nombre} → nombre; {o} → o/a y {lo} → lo/la según el sexo
+ * (ej. "tranquil{o}", "saca{lo}"). Sin sexo indicado se usa el masculino genérico.
+ */
+export function personalize(text: string, dog: { name: string; sex?: 'macho' | 'hembra' | null }) {
+  const female = dog.sex === 'hembra';
+  return text
+    .replaceAll('{nombre}', dog.name)
+    .replaceAll('{o}', female ? 'a' : 'o')
+    .replaceAll('{lo}', female ? 'la' : 'lo');
 }

@@ -59,18 +59,18 @@ function v3WithData() {
   return adapter(sdb);
 }
 
-describe('migración a la versión 4', () => {
+describe('migraciones (v3 → última)', () => {
   it('conserva todos los datos de Olivia con ids UUID', async () => {
     const db = v3WithData();
     await migrateDbIfNeeded(db);
 
     const version = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
-    expect(version?.user_version).toBe(4);
+    expect(version?.user_version).toBe(5);
 
     const [oli] = await getDogs(db);
     expect(oli.name).toBe('Olivia');
     expect(oli.id).toMatch(UUID);
-    expect(oli).toMatchObject({ setup_done: 1, potty_spot: 'patio', deleted: 0, dirty: 1 });
+    expect(oli).toMatchObject({ setup_done: 1, potty_spot: 'patio', sex: null, deleted: 0, dirty: 1 });
 
     const logs = await getPottyLogsSince(db, oli.id, new Date('2026-10-01'));
     expect(logs).toHaveLength(2);
@@ -87,10 +87,10 @@ describe('migración a la versión 4', () => {
     expect(state?.value).toBe(oli.id);
   });
 
-  it('una instalación nueva llega a la versión 4 y crea mascotas', async () => {
+  it('una instalación nueva llega a la última versión y crea mascotas', async () => {
     const db = adapter(new SQL.Database());
     await migrateDbIfNeeded(db);
-    const id = await createDog(db, { name: 'Luna', breed: 'Mestiza', birth_date: '2026-09-01', weight_kg: null });
+    const id = await createDog(db, { name: 'Luna', breed: 'Mestiza', birth_date: '2026-09-01', weight_kg: null, sex: null });
     expect(id).toMatch(UUID);
     expect((await getReminders(db, id)).length).toBe(6);
   });
@@ -100,7 +100,7 @@ describe('marcas sincronizables', () => {
   async function freshDog() {
     const db = adapter(new SQL.Database());
     await migrateDbIfNeeded(db);
-    return { db, id: await createDog(db, { name: 'Oli', breed: 'Dachshund', birth_date: '2026-08-24', weight_kg: null }) };
+    return { db, id: await createDog(db, { name: 'Oli', breed: 'Dachshund', birth_date: '2026-08-24', weight_kg: null, sex: null }) };
   }
 
   it('marcar y desmarcar usa una sola fila con borrado suave', async () => {
@@ -149,13 +149,13 @@ describe('respaldo', () => {
   it('exportar e importar en otra base deja los mismos datos', async () => {
     const a = adapter(new SQL.Database());
     await migrateDbIfNeeded(a);
-    const id = await createDog(a, { name: 'Oli', breed: 'Dachshund', birth_date: '2026-08-24', weight_kg: 1.8 });
+    const id = await createDog(a, { name: 'Oli', breed: 'Dachshund', birth_date: '2026-08-24', weight_kg: 1.8, sex: 'hembra' as const });
     await setItemDone(a, id, 'prep-cama', true);
 
     const b = adapter(new SQL.Database());
     await migrateDbIfNeeded(b);
     await importAll(b, await exportAll(a));
-    expect((await getDogs(b))[0]).toMatchObject({ id, name: 'Oli', weight_kg: 1.8 });
+    expect((await getDogs(b))[0]).toMatchObject({ id, name: 'Oli', weight_kg: 1.8, sex: 'hembra' as const });
     expect(await getDoneItems(b, id)).toEqual(new Set(['prep-cama']));
     expect((await getReminders(b, id)).length).toBe(6);
   });

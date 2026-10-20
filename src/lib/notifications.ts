@@ -2,8 +2,8 @@
 import * as Notifications from 'expo-notifications';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { Platform } from 'react-native';
-import { getDogs, getLastPottyLog, getReminders, type Dog, type Reminder } from './db';
-import { parseTime, pottySlots, type PottySlot } from './schedule';
+import { getDogs, getLastActivity, getLastPottyLog, getReminders, type Dog, type Reminder } from './db';
+import { parseTime, pottySlots, routineHint, type PottySlot } from './schedule';
 
 const supported = Platform.OS === 'ios' || Platform.OS === 'android';
 
@@ -81,8 +81,12 @@ async function scheduleAll(db: SQLiteDatabase) {
   const dogs = await getDogs(db);
   const perDog = await Promise.all(
     dogs.map(async (dog) => {
-      const [reminders, last] = await Promise.all([getReminders(db, dog.id), getLastPottyLog(db, dog.id)]);
-      return { dog, reminders: reminders.filter((r) => r.enabled), last };
+      const [reminders, last, activity] = await Promise.all([
+        getReminders(db, dog.id),
+        getLastPottyLog(db, dog.id),
+        getLastActivity(db, dog.id),
+      ]);
+      return { dog, reminders: reminders.filter((r) => r.enabled), last, activity };
     }),
   );
 
@@ -92,7 +96,15 @@ async function scheduleAll(db: SQLiteDatabase) {
   const pottyBudget = intervalCount ? Math.max(4, Math.floor((MAX_SCHEDULED - fixedCount) / intervalCount)) : 0;
   const now = new Date();
 
-  for (const { dog, reminders, last } of perDog) {
+  for (const { dog, reminders, last, activity } of perDog) {
+    // Salida ~15 min después de comer, si la mascota tiene activado el aviso de baño.
+    const hint = routineHint(activity, last, now);
+    if (hint?.kind === 'meal' && !hint.due && reminders.some((r) => r.interval_min)) {
+      await Notifications.scheduleNotificationAsync({
+        content: { title: 'Salida después de comer 🍽️', body: `Ya pasaron unos 15 minutos desde que ${dog.name} comió. ¡Afuera!` },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: hint.outingAt },
+      });
+    }
     for (const r of reminders) {
       if (r.interval_min) {
         const slots = pottySlots({

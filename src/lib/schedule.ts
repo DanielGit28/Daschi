@@ -83,6 +83,36 @@ export function pottySlots({ lastLog, now, intervalMin, quietStart, quietEnd, ho
   return slots;
 }
 
+/** Minutos después de comer en que conviene salir al baño. */
+export const AFTER_MEAL_MIN = 15;
+const JUST_WOKE_MIN = 15;
+
+export type RoutineHint =
+  | { kind: 'sleeping'; since: Date }
+  | { kind: 'woke'; at: Date }
+  | { kind: 'meal'; outingAt: Date; due: boolean };
+
+/**
+ * Pista según la última comida o siesta, si todavía no hubo baño después:
+ * durmiendo, recién despierto (afuera ya) o comió (afuera ~15 min después).
+ */
+export function routineHint(
+  lastActivity: { kind: string; logged_at: string } | null,
+  lastPotty: { logged_at: string } | null,
+  now: Date,
+): RoutineHint | null {
+  if (!lastActivity) return null;
+  const at = new Date(lastActivity.logged_at);
+  if (lastPotty && new Date(lastPotty.logged_at) >= at) return null;
+  const minutesAgo = (now.getTime() - at.getTime()) / MS_PER_MIN;
+  if (lastActivity.kind === 'dormir') return minutesAgo < 4 * 60 ? { kind: 'sleeping', since: at } : null;
+  if (lastActivity.kind === 'despertar') return minutesAgo < JUST_WOKE_MIN ? { kind: 'woke', at } : null;
+  if (lastActivity.kind === 'comida' && minutesAgo < 60) {
+    return { kind: 'meal', outingAt: new Date(at.getTime() + AFTER_MEAL_MIN * MS_PER_MIN), due: minutesAgo >= AFTER_MEAL_MIN };
+  }
+  return null;
+}
+
 /** Estado para mostrar en "Hoy". */
 export function pottyStatus(opts: SlotOptions): { overdue: boolean; quiet: boolean; next: Date | null } {
   const quiet = isQuiet(opts.now, opts.quietStart, opts.quietEnd);

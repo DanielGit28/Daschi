@@ -12,6 +12,7 @@ import {
   type ReminderKind,
   type ReminderPatch,
 } from '../../lib/db';
+import { personalize } from '../../content';
 import { useDog } from '../../lib/dog-context';
 import { ensureNotificationPermission, hasNotificationPermission, syncReminders } from '../../lib/notifications';
 import { formatTime, parseTime } from '../../lib/schedule';
@@ -126,7 +127,7 @@ export default function Recordatorios() {
             <H2>🐾 {potty.label}</H2>
             <Switch value={!!potty.enabled} onValueChange={(v) => save(potty.id, { enabled: v ? 1 : 0 })} trackColor={{ true: colors.success }} />
           </View>
-          <Muted>Cuenta desde el último registro de baño. Después de comer, dormir o jugar, sacala igual.</Muted>
+          <Muted>{personalize('Cuenta desde el último registro de baño. Después de comer, dormir o jugar, saca{lo} igual.', dog)}</Muted>
 
           <Text style={styles.label}>Cada</Text>
           <View style={styles.chips}>
