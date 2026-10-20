@@ -45,13 +45,13 @@ export function DogForm({ initial, submitLabel, onSubmit }: Props) {
   return (
     <View style={styles.form}>
       <Field label="Nombre">
-        <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="Ej. Canela" autoCapitalize="words" returnKeyType="next" />
+        <TextInput placeholderTextColor={colors.textMuted} keyboardAppearance="dark" style={styles.input} value={name} onChangeText={setName} placeholder="Ej. Canela" autoCapitalize="words" returnKeyType="next" />
       </Field>
       <Field label="Raza">
-        <TextInput style={styles.input} value={breed} onChangeText={setBreed} />
+        <TextInput placeholderTextColor={colors.textMuted} keyboardAppearance="dark" style={styles.input} value={breed} onChangeText={setBreed} />
       </Field>
       <Field label="Fecha de nacimiento (DD/MM/AAAA)">
-        <TextInput
+        <TextInput placeholderTextColor={colors.textMuted} keyboardAppearance="dark"
           style={styles.input}
           value={birth}
           onChangeText={setBirth}
@@ -60,7 +60,7 @@ export function DogForm({ initial, submitLabel, onSubmit }: Props) {
         />
       </Field>
       <Field label="Peso en kg (opcional)">
-        <TextInput style={styles.input} value={weight} onChangeText={setWeight} placeholder="1.8" keyboardType="decimal-pad" />
+        <TextInput placeholderTextColor={colors.textMuted} keyboardAppearance="dark" style={styles.input} value={weight} onChangeText={setWeight} placeholder="1.8" keyboardType="decimal-pad" />
       </Field>
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Button label={saving ? 'Guardando…' : submitLabel} onPress={handleSubmit} disabled={saving} big />

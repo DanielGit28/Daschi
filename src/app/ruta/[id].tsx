@@ -96,7 +96,7 @@ export default function Ruta() {
 const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: '800', color: colors.text },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  count: { fontSize: 16, fontWeight: '700', color: colors.green },
+  count: { fontSize: 16, fontWeight: '700', color: colors.success },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm },
   icon: { fontSize: 20, width: 28, textAlign: 'center' },
   lessonTitle: { fontSize: 16, fontWeight: '600', color: colors.text },

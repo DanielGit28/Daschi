@@ -1,12 +1,12 @@
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
-import { Alert, Share, StyleSheet, Text } from 'react-native';
+import { Alert, Pressable, Share, StyleSheet, Text } from 'react-native';
 import { DogForm } from '../../components/DogForm';
 import { Button, Card, H2, Muted, Screen } from '../../components/ui';
 import { CONTENT } from '../../content';
 import { formatHumanDate } from '../../lib/age';
-import { exportAll, updateDog } from '../../lib/db';
+import { deleteDog, exportAll, updateDog } from '../../lib/db';
 import { useDog } from '../../lib/dog-context';
 import { syncReminders } from '../../lib/notifications';
 import { activeGoals } from '../../lib/plan';
@@ -18,7 +18,7 @@ const HOUSEHOLD_LABEL = { solo: 'Solo yo', familia: 'Pareja o familia', ninos: '
 
 export default function Perfil() {
   const db = useSQLiteContext();
-  const { dog, reload } = useDog();
+  const { dog, reload, selectDog } = useDog();
   const { state } = usePlan(dog);
   const [editing, setEditing] = useState(false);
 
@@ -30,6 +30,27 @@ export default function Perfil() {
   }
 
   const goals = state ? activeGoals(state.profile, CONTENT.goals) : [];
+
+  function confirmDelete() {
+    if (!dog) return;
+    Alert.alert(
+      `¿Eliminar a ${dog.name}?`,
+      'Se borran su perfil, registros y progreso en todos los dispositivos. No se puede deshacer.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteDog(db, dog.id);
+            await selectDog(null);
+            await syncReminders(db);
+            router.replace('/mascotas');
+          },
+        },
+      ],
+    );
+  }
 
   return (
     <Screen title="Perfil">
@@ -81,6 +102,14 @@ export default function Perfil() {
         />
       </Card>
 
+      <Card>
+        <H2>Mascotas</H2>
+        <Button label="Cambiar de mascota" variant="secondary" onPress={() => router.push('/mascotas')} />
+        <Pressable onPress={confirmDelete} hitSlop={8} accessibilityRole="button">
+          <Text style={styles.delete}>Eliminar el perfil de {dog.name}</Text>
+        </Pressable>
+      </Card>
+
       <Muted>Dachsi no reemplaza al veterinario. Ante cualquier duda de salud, consultá con tu veterinario.</Muted>
     </Screen>
   );
@@ -89,4 +118,5 @@ export default function Perfil() {
 const styles = StyleSheet.create({
   name: { fontSize: 24, fontWeight: '800', color: colors.text },
   goals: { fontSize: 16, color: colors.text, lineHeight: 24 },
+  delete: { color: colors.danger, fontSize: 15, textAlign: 'center', paddingVertical: 8 },
 });

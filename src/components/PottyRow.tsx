@@ -27,7 +27,7 @@ export function PottyRow({ log, onDelete }: { log: PottyLog; onDelete: (log: Pot
 
   return (
     <Pressable onLongPress={confirm} style={styles.item}>
-      <View style={[styles.dot, { backgroundColor: log.place === 'fuera' ? colors.green : colors.caramel }]} />
+      <View style={[styles.dot, { backgroundColor: log.place === 'fuera' ? colors.success : colors.accent }]} />
       <Text style={styles.time}>{timeLabel(log.logged_at)}</Text>
       <Text style={styles.what}>{pottyLabel(log)}</Text>
       <Pressable onPress={confirm} hitSlop={10} accessibilityRole="button" accessibilityLabel="Borrar registro" style={styles.delete}>

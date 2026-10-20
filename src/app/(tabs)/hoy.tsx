@@ -2,6 +2,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Mascot, Spots } from '../../components/Mascot';
 import { PottyRow, pottyLabel } from '../../components/PottyRow';
 import { Button, Card, CheckRow, H2, Muted, ProgressBar, Screen } from '../../components/ui';
 import { CONTENT, goalById, personalize, type Lesson } from '../../content';
@@ -43,7 +44,7 @@ export default function Hoy() {
   const [pottyReminder, setPottyReminder] = useState<Reminder | null>(null);
   const [now, setNow] = useState(() => new Date());
   // Último toque, para poder deshacerlo durante unos segundos.
-  const [undo, setUndo] = useState<{ id: number; label: string } | null>(null);
+  const [undo, setUndo] = useState<{ id: string; label: string } | null>(null);
 
   useEffect(() => {
     if (!undo) return;
@@ -90,7 +91,7 @@ export default function Hoy() {
     await syncReminders(db); // la próxima salida se cuenta desde este registro
   }
 
-  async function remove(id: number) {
+  async function remove(id: string) {
     setUndo(null);
     await deletePottyLog(db, id);
     await load();
@@ -109,10 +110,12 @@ export default function Hoy() {
     return (
       <Screen title={`Preparando todo para ${dog.name}`}>
         <Card style={styles.hero}>
-          <Text style={styles.churro}>🌭</Text>
+          <Spots />
+          <Mascot size={92} />
           <View style={{ flex: 1, gap: 2 }}>
             <Text style={styles.age}>{daysLeft === 1 ? '¡Llega mañana!' : `Faltan ${daysLeft} días`}</Text>
             <Muted>Mientras tanto, dejemos la casa lista.</Muted>
+            <SwitchDog />
           </View>
         </Card>
         <PrepChecklist plan={plan} onToggle={toggleItem} />
@@ -141,12 +144,14 @@ export default function Hoy() {
   return (
     <Screen title={`Hoy con ${dog.name}`}>
       <Card style={styles.hero}>
-        <Text style={styles.churro}>🌭</Text>
+        <Spots />
+        <Mascot size={92} />
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={styles.age}>{ageLabel(dog.birth_date)}</Text>
           <Muted>
             Etapa {stage.number} · {stage.name}
           </Muted>
+          <SwitchDog />
         </View>
       </Card>
 
@@ -155,8 +160,8 @@ export default function Hoy() {
       <Card>
         <H2>Baño</H2>
         <View style={styles.row}>
-          <Stat value={outside} label="afuera" color={colors.green} />
-          <Stat value={inside} label="accidentes" color={colors.caramel} />
+          <Stat value={outside} label="afuera" color={colors.success} />
+          <Stat value={inside} label="accidentes" color={colors.accent} />
         </View>
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
@@ -226,6 +231,15 @@ export default function Hoy() {
 
       {tip ? <TipCard text={t(tip.text)} /> : null}
     </Screen>
+  );
+}
+
+/** Enlace para cambiar de mascota o registrar otra. */
+function SwitchDog() {
+  return (
+    <Pressable onPress={() => router.push('/mascotas')} hitSlop={8} style={styles.switchDog} accessibilityRole="button">
+      <Text style={styles.switchDogText}>Cambiar mascota ▾</Text>
+    </Pressable>
   );
 }
 
@@ -343,24 +357,25 @@ function Stat({ value, label, color }: { value: number; label: string; color: st
 }
 
 const styles = StyleSheet.create({
-  hero: { flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: colors.caramelSoft },
-  churro: { fontSize: 44 },
+  hero: { flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: colors.accentSoft, borderColor: colors.accentSoft, overflow: 'hidden' },
+  switchDog: { alignSelf: 'flex-start', marginTop: space.xs },
+  switchDogText: { fontSize: 14, fontWeight: '700', color: colors.accent },
   age: { fontSize: 20, fontWeight: '700', color: colors.text },
   row: { flexDirection: 'row', gap: space.sm },
   undo: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.text,
+    backgroundColor: colors.surfaceRaised,
     borderRadius: radius.sm,
     paddingHorizontal: space.md,
     paddingVertical: 12,
   },
-  undoText: { color: '#FFFFFF', fontSize: 15, flex: 1 },
-  undoAction: { color: colors.caramelSoft, fontSize: 15, fontWeight: '800' },
-  overdue: { backgroundColor: colors.caramelSoft, borderColor: colors.caramel, borderWidth: 2 },
+  undoText: { color: colors.text, fontSize: 15, flex: 1 },
+  undoAction: { color: colors.accent, fontSize: 15, fontWeight: '800' },
+  overdue: { backgroundColor: colors.accentSoft, borderColor: colors.accent, borderWidth: 2 },
   nextTitle: { fontSize: 20, fontWeight: '700', color: colors.text },
-  advice: { gap: space.sm, backgroundColor: colors.caramelSoft, borderRadius: radius.sm, padding: space.md },
+  advice: { gap: space.sm, backgroundColor: colors.accentSoft, borderRadius: radius.sm, padding: space.md },
   adviceText: { fontSize: 15, color: colors.text, lineHeight: 21 },
   lesson: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm },
   lessonEmoji: { fontSize: 26 },
@@ -369,13 +384,13 @@ const styles = StyleSheet.create({
   chevron: { fontSize: 24, color: colors.textMuted },
   socialRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: 6 },
   socialText: { flex: 1, fontSize: 16, color: colors.text },
-  socialButton: { backgroundColor: colors.greenSoft, borderRadius: radius.sm, paddingHorizontal: 14, paddingVertical: 8 },
+  socialButton: { backgroundColor: colors.successSoft, borderRadius: radius.sm, paddingHorizontal: 14, paddingVertical: 8 },
   socialButtonText: { fontSize: 20 },
-  link: { fontSize: 15, fontWeight: '700', color: colors.caramel },
+  link: { fontSize: 15, fontWeight: '700', color: colors.accent },
   prepHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  prepCount: { fontSize: 16, fontWeight: '700', color: colors.green },
+  prepCount: { fontSize: 16, fontWeight: '700', color: colors.success },
   prepGroup: { fontSize: 14, fontWeight: '700', color: colors.textMuted, marginTop: space.sm, textTransform: 'uppercase' },
-  tip: { backgroundColor: colors.greenSoft, borderColor: colors.green },
+  tip: { backgroundColor: colors.successSoft, borderColor: colors.success },
   tipTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
   tipText: { fontSize: 16, color: colors.text, lineHeight: 23 },
   stat: { flex: 1, borderWidth: 2, borderRadius: radius.sm, paddingVertical: space.sm, alignItems: 'center' },

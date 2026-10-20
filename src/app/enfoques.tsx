@@ -127,7 +127,7 @@ export default function Enfoques() {
   return (
     <Screen>
       <View style={styles.top}>
-        <ProgressBar value={step + 1} max={STEPS} color={colors.caramel} />
+        <ProgressBar value={step + 1} max={STEPS} color={colors.accent} />
         <Text style={styles.stepLabel}>
           {step + 1} de {STEPS}
         </Text>
@@ -139,7 +139,7 @@ export default function Enfoques() {
           <OptionCard emoji="🏡" title="Ya está en casa" selected={atHome === true} onPress={() => setAtHome(true)} />
           <OptionCard emoji="📅" title="Llega pronto" selected={atHome === false} onPress={() => setAtHome(false)} />
           {atHome === false ? (
-            <TextInput
+            <TextInput placeholderTextColor={colors.textMuted} keyboardAppearance="dark"
               style={styles.input}
               value={arrivalText}
               onChangeText={setArrivalText}
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   top: { gap: space.xs, marginTop: space.sm },
   stepLabel: { fontSize: 13, color: colors.textMuted, textAlign: 'right' },
   question: { fontSize: 26, fontWeight: '800', color: colors.text },
-  auto: { backgroundColor: colors.greenSoft, borderRadius: radius.sm, padding: space.md, gap: space.xs },
+  auto: { backgroundColor: colors.successSoft, borderRadius: radius.sm, padding: space.md, gap: space.xs },
   autoTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
   autoList: { fontSize: 15, color: colors.text, lineHeight: 22 },
   option: {
@@ -252,11 +252,11 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  optionSelected: { borderColor: colors.caramel, backgroundColor: colors.caramelSoft },
+  optionSelected: { borderColor: colors.accent, backgroundColor: colors.accentSoft },
   optionEmoji: { fontSize: 28 },
   optionTitle: { fontSize: 17, fontWeight: '700', color: colors.text },
   optionDetail: { fontSize: 14, color: colors.textMuted, lineHeight: 19 },
-  optionCheck: { fontSize: 20, fontWeight: '800', color: colors.caramel },
+  optionCheck: { fontSize: 20, fontWeight: '800', color: colors.accent },
   input: {
     backgroundColor: colors.surface,
     borderWidth: 1,

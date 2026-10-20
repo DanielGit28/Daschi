@@ -89,14 +89,14 @@ function GoalCard({ goal, state, badge }: { goal: Goal; state: PlanState; badge?
 }
 
 const styles = StyleSheet.create({
-  stage: { backgroundColor: colors.caramelSoft, borderColor: colors.caramel },
+  stage: { backgroundColor: colors.accentSoft, borderColor: colors.accent },
   stageName: { fontSize: 18, fontWeight: '700', color: colors.text },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  link: { fontSize: 16, fontWeight: '700', color: colors.caramel },
+  link: { fontSize: 16, fontWeight: '700', color: colors.accent },
   goalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.sm },
   goalName: { fontSize: 18, fontWeight: '700', color: colors.text, flex: 1 },
   badge: {
-    backgroundColor: colors.greenSoft,
+    backgroundColor: colors.successSoft,
     color: colors.text,
     fontSize: 12,
     fontWeight: '700',
@@ -106,6 +106,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   stageRow: { flexDirection: 'row', justifyContent: 'space-between', padding: space.sm, borderRadius: radius.sm },
-  stageRowActive: { backgroundColor: colors.caramelSoft },
+  stageRowActive: { backgroundColor: colors.accentSoft },
   stageRowName: { fontSize: 15, color: colors.text, fontWeight: '600' },
 });

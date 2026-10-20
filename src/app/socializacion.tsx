@@ -36,7 +36,7 @@ export default function Socializacion() {
     await reload();
   }
 
-  async function remove(id: number) {
+  async function remove(id: string) {
     await deleteSocializationLog(db, id);
     await reload();
   }

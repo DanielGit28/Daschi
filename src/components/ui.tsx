@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, radius, space } from '../lib/theme';
 
@@ -15,7 +15,7 @@ export function Screen({ children, title, underHeader }: { children: ReactNode; 
   );
 }
 
-export function Card({ children, style }: { children: ReactNode; style?: ViewStyle }) {
+export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
@@ -28,8 +28,8 @@ type ButtonProps = {
 };
 
 export function Button({ label, onPress, variant = 'primary', disabled, big }: ButtonProps) {
-  const bg = variant === 'primary' ? colors.caramel : variant === 'green' ? colors.green : colors.caramelSoft;
-  const fg = variant === 'secondary' ? colors.text : '#FFFFFF';
+  const bg = variant === 'primary' ? colors.accent : variant === 'green' ? colors.success : colors.surfaceRaised;
+  const fg = variant === 'primary' ? colors.onAccent : variant === 'green' ? colors.onSuccess : colors.text;
   return (
     <Pressable
       accessibilityRole="button"
@@ -60,7 +60,7 @@ export function Chip({ label, selected, onPress }: { label: string; selected?: b
   );
 }
 
-export function ProgressBar({ value, max, color = colors.green }: { value: number; max: number; color?: string }) {
+export function ProgressBar({ value, max, color = colors.success }: { value: number; max: number; color?: string }) {
   const pct = max > 0 ? Math.min(1, value / max) : 0;
   return (
     <View style={styles.progressTrack} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max, now: value }}>
@@ -125,8 +125,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.surface,
   },
-  checkBoxOn: { backgroundColor: colors.green, borderColor: colors.green },
-  checkMark: { color: '#FFFFFF', fontWeight: '800', fontSize: 15 },
+  checkBoxOn: { backgroundColor: colors.success, borderColor: colors.success },
+  checkMark: { color: colors.onSuccess, fontWeight: '800', fontSize: 15 },
   checkLabel: { fontSize: 16, color: colors.text },
   checkLabelOn: { color: colors.textMuted, textDecorationLine: 'line-through' },
   chip: {
@@ -137,9 +137,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 14,
   },
-  chipSelected: { backgroundColor: colors.caramel, borderColor: colors.caramel },
+  chipSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
   chipText: { fontSize: 15, fontWeight: '600', color: colors.text },
-  chipTextSelected: { color: '#FFFFFF' },
+  chipTextSelected: { color: colors.onAccent },
   muted: { fontSize: 15, color: colors.textMuted, lineHeight: 21 },
   h2: { fontSize: 19, fontWeight: '700', color: colors.text },
 });

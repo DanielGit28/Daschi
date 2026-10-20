@@ -25,7 +25,7 @@ function ReminderSync() {
 const detailHeader = {
   headerShown: true,
   headerBackTitle: 'Volver',
-  headerTintColor: colors.caramel,
+  headerTintColor: colors.accent,
   headerShadowVisible: false,
   headerStyle: { backgroundColor: colors.background },
   headerTitleStyle: { color: colors.text },
@@ -36,7 +36,7 @@ export default function RootLayout() {
     <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
       <DogProvider>
         <ReminderSync />
-        <StatusBar style="dark" />
+        <StatusBar style="light" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
           <Stack.Screen name="leccion/[id]" options={detailHeader} />
           <Stack.Screen name="ruta/[id]" options={detailHeader} />

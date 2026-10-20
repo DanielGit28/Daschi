@@ -30,7 +30,7 @@ const KINDS: Array<{ kind: ReminderKind; label: string; emoji: string }> = [
 
 const emojiFor = (kind: ReminderKind) => KINDS.find((k) => k.kind === kind)?.emoji ?? '⏰';
 
-type Draft = { id: number | 'new'; kind: ReminderKind; label: string; time: string };
+type Draft = { id: string | 'new'; kind: ReminderKind; label: string; time: string };
 
 export default function Recordatorios() {
   const db = useSQLiteContext();
@@ -57,7 +57,7 @@ export default function Recordatorios() {
   const potty = reminders.find((r) => r.interval_min != null);
   const fixed = reminders.filter((r) => r.interval_min == null);
 
-  async function save(id: number, patch: ReminderPatch) {
+  async function save(id: string, patch: ReminderPatch) {
     if (patch.enabled) {
       const ok = await ensureNotificationPermission();
       setPermission(ok);
@@ -124,7 +124,7 @@ export default function Recordatorios() {
         <Card>
           <View style={styles.header}>
             <H2>🐾 {potty.label}</H2>
-            <Switch value={!!potty.enabled} onValueChange={(v) => save(potty.id, { enabled: v ? 1 : 0 })} trackColor={{ true: colors.green }} />
+            <Switch value={!!potty.enabled} onValueChange={(v) => save(potty.id, { enabled: v ? 1 : 0 })} trackColor={{ true: colors.success }} />
           </View>
           <Muted>Cuenta desde el último registro de baño. Después de comer, dormir o jugar, sacala igual.</Muted>
 
@@ -170,7 +170,7 @@ export default function Recordatorios() {
               <Text style={styles.rowLabel}>
                 {emojiFor(r.kind)} {r.label}
               </Text>
-              <Switch value={!!r.enabled} onValueChange={(v) => save(r.id, { enabled: v ? 1 : 0 })} trackColor={{ true: colors.green }} />
+              <Switch value={!!r.enabled} onValueChange={(v) => save(r.id, { enabled: v ? 1 : 0 })} trackColor={{ true: colors.success }} />
             </Pressable>
           ),
         )}
@@ -208,13 +208,13 @@ function DraftEditor({ draft, error, onChange, onSave, onCancel, onDelete }: Edi
           <Chip key={k.kind} label={`${k.emoji} ${k.label}`} selected={draft.kind === k.kind} onPress={() => onChange({ ...draft, kind: k.kind })} />
         ))}
       </View>
-      <TextInput
+      <TextInput placeholderTextColor={colors.textMuted} keyboardAppearance="dark"
         style={styles.input}
         value={draft.label}
         onChangeText={(label) => onChange({ ...draft, label })}
         placeholder="Nombre, ej. Salida de madrugada"
       />
-      <TextInput
+      <TextInput placeholderTextColor={colors.textMuted} keyboardAppearance="dark"
         style={styles.input}
         value={draft.time}
         onChangeText={(time) => onChange({ ...draft, time })}
@@ -240,7 +240,7 @@ function DraftEditor({ draft, error, onChange, onSave, onCancel, onDelete }: Edi
 }
 
 const styles = StyleSheet.create({
-  warning: { backgroundColor: colors.caramelSoft },
+  warning: { backgroundColor: colors.accentSoft },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   label: { fontSize: 14, fontWeight: '600', color: colors.textMuted, marginTop: space.xs },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },

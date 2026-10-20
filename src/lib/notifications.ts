@@ -2,7 +2,7 @@
 import * as Notifications from 'expo-notifications';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { Platform } from 'react-native';
-import { getDog, getLastPottyLog, getReminders, type Dog, type Reminder } from './db';
+import { getDogs, getLastPottyLog, getReminders, type Dog, type Reminder } from './db';
 import { parseTime, pottySlots, type PottySlot } from './schedule';
 
 const supported = Platform.OS === 'ios' || Platform.OS === 'android';
@@ -71,37 +71,52 @@ function fixedContent(dog: Dog, r: Reminder): Notifications.NotificationContentI
   }
 }
 
+/** iOS guarda como máximo 64 avisos pendientes; dejamos margen. */
+const MAX_SCHEDULED = 60;
+
 async function scheduleAll(db: SQLiteDatabase) {
   await Notifications.cancelAllScheduledNotificationsAsync();
-  const dog = await getDog(db);
-  if (!dog || !(await hasNotificationPermission())) return;
+  if (!(await hasNotificationPermission())) return;
 
-  const [reminders, last] = await Promise.all([getReminders(db, dog.id), getLastPottyLog(db, dog.id)]);
+  const dogs = await getDogs(db);
+  const perDog = await Promise.all(
+    dogs.map(async (dog) => {
+      const [reminders, last] = await Promise.all([getReminders(db, dog.id), getLastPottyLog(db, dog.id)]);
+      return { dog, reminders: reminders.filter((r) => r.enabled), last };
+    }),
+  );
+
+  // Los de hora fija primero; el espacio que queda se reparte entre los avisos de baño de cada mascota.
+  const fixedCount = perDog.reduce((n, d) => n + d.reminders.filter((r) => !r.interval_min).length, 0);
+  const intervalCount = perDog.reduce((n, d) => n + d.reminders.filter((r) => r.interval_min).length, 0);
+  const pottyBudget = intervalCount ? Math.max(4, Math.floor((MAX_SCHEDULED - fixedCount) / intervalCount)) : 0;
   const now = new Date();
 
-  for (const r of reminders) {
-    if (!r.enabled) continue;
-    if (r.interval_min) {
-      const slots = pottySlots({
-        lastLog: last ? new Date(last.logged_at) : null,
-        now,
-        intervalMin: r.interval_min,
-        quietStart: parseTime(r.quiet_start),
-        quietEnd: parseTime(r.quiet_end),
-      });
-      for (const slot of slots) {
+  for (const { dog, reminders, last } of perDog) {
+    for (const r of reminders) {
+      if (r.interval_min) {
+        const slots = pottySlots({
+          lastLog: last ? new Date(last.logged_at) : null,
+          now,
+          intervalMin: r.interval_min,
+          quietStart: parseTime(r.quiet_start),
+          quietEnd: parseTime(r.quiet_end),
+          max: Math.min(40, pottyBudget),
+        });
+        for (const slot of slots) {
+          await Notifications.scheduleNotificationAsync({
+            content: pottyContent(dog, r, slot),
+            trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: slot.at },
+          });
+        }
+      } else {
+        const minutes = parseTime(r.time_of_day);
+        if (minutes == null) continue;
         await Notifications.scheduleNotificationAsync({
-          content: pottyContent(dog, r, slot),
-          trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: slot.at },
+          content: fixedContent(dog, r),
+          trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour: Math.floor(minutes / 60), minute: minutes % 60 },
         });
       }
-    } else {
-      const minutes = parseTime(r.time_of_day);
-      if (minutes == null) continue;
-      await Notifications.scheduleNotificationAsync({
-        content: fixedContent(dog, r),
-        trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour: Math.floor(minutes / 60), minute: minutes % 60 },
-      });
     }
   }
 }

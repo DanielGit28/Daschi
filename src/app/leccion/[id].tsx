@@ -130,7 +130,7 @@ export default function Leccion() {
 }
 
 /** Temporizador de 5 minutos, contador de repeticiones y "¿cómo te fue?". */
-function SessionPanel({ dogId, lessonId, onSaved }: { dogId: number; lessonId: string; onSaved: () => void }) {
+function SessionPanel({ dogId, lessonId, onSaved }: { dogId: string; lessonId: string; onSaved: () => void }) {
   const db = useSQLiteContext();
   const [endsAt, setEndsAt] = useState<number | null>(null);
   const [remaining, setRemaining] = useState(SESSION_SECONDS);
@@ -233,8 +233,8 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: colors.caramel,
-    color: '#FFFFFF',
+    backgroundColor: colors.accent,
+    color: colors.onAccent,
     fontWeight: '800',
     textAlign: 'center',
     lineHeight: 28,
@@ -242,13 +242,13 @@ const styles = StyleSheet.create({
   },
   stepText: { fontSize: 16, color: colors.text, lineHeight: 23 },
   stepNext: { fontSize: 14, color: colors.textMuted, lineHeight: 20 },
-  dachshund: { backgroundColor: colors.caramelSoft },
-  doneCard: { borderColor: colors.green, borderWidth: 2, backgroundColor: colors.greenSoft },
-  session: { borderColor: colors.caramel, borderWidth: 2 },
+  dachshund: { backgroundColor: colors.accentSoft },
+  doneCard: { borderColor: colors.success, borderWidth: 2, backgroundColor: colors.successSoft },
+  session: { borderColor: colors.accent, borderWidth: 2 },
   sessionRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   timer: { fontSize: 44, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'], minWidth: 120 },
-  reps: { backgroundColor: colors.caramelSoft, borderRadius: radius.md, paddingVertical: space.md, alignItems: 'center' },
-  repsValue: { fontSize: 40, fontWeight: '800', color: colors.caramel },
+  reps: { backgroundColor: colors.accentSoft, borderRadius: radius.md, paddingVertical: space.md, alignItems: 'center' },
+  repsValue: { fontSize: 40, fontWeight: '800', color: colors.accent },
   repsLabel: { fontSize: 14, color: colors.textMuted },
   askLabel: { fontSize: 16, fontWeight: '700', color: colors.text },
   ratings: { flexDirection: 'row', gap: space.sm, flexWrap: 'wrap' },
