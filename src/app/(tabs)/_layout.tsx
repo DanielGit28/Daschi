@@ -13,6 +13,7 @@ export default function TabsLayout() {
   const { dog, loading } = useDog();
   if (loading) return null;
   if (!dog) return <Redirect href="/onboarding" />;
+  if (!dog.setup_done) return <Redirect href="/enfoques" />;
 
   return (
     <Tabs

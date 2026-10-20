@@ -3,9 +3,10 @@ import { Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, radius, space } from '../lib/theme';
 
-export function Screen({ children, title }: { children: ReactNode; title?: string }) {
+/** `underHeader`: la pantalla tiene encabezado de navegación, que ya respeta el área segura de arriba. */
+export function Screen({ children, title, underHeader }: { children: ReactNode; title?: string; underHeader?: boolean }) {
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={underHeader ? [] : ['top']}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         {title ? <Text style={styles.title}>{title}</Text> : null}
         {children}
@@ -59,6 +60,28 @@ export function Chip({ label, selected, onPress }: { label: string; selected?: b
   );
 }
 
+export function ProgressBar({ value, max, color = colors.green }: { value: number; max: number; color?: string }) {
+  const pct = max > 0 ? Math.min(1, value / max) : 0;
+  return (
+    <View style={styles.progressTrack} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max, now: value }}>
+      <View style={[styles.progressFill, { width: `${pct * 100}%`, backgroundColor: color }]} />
+    </View>
+  );
+}
+
+/** Fila con casilla para marcar, toda la fila es tocable. */
+export function CheckRow({ checked, label, detail, onPress }: { checked: boolean; label: string; detail?: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} accessibilityRole="checkbox" accessibilityState={{ checked }} style={styles.checkRow}>
+      <View style={[styles.checkBox, checked && styles.checkBoxOn]}>{checked ? <Text style={styles.checkMark}>✓</Text> : null}</View>
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.checkLabel, checked && styles.checkLabelOn]}>{label}</Text>
+        {detail ? <Text style={styles.muted}>{detail}</Text> : null}
+      </View>
+    </Pressable>
+  );
+}
+
 export function Muted({ children }: { children: ReactNode }) {
   return <Text style={styles.muted}>{children}</Text>;
 }
@@ -89,6 +112,23 @@ const styles = StyleSheet.create({
   buttonBig: { paddingVertical: 18, borderRadius: radius.md },
   buttonText: { fontSize: 16, fontWeight: '700' },
   buttonTextBig: { fontSize: 18 },
+  progressTrack: { height: 8, borderRadius: 4, backgroundColor: colors.border, overflow: 'hidden' },
+  progressFill: { height: 8, borderRadius: 4 },
+  checkRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: 10 },
+  checkBox: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+  },
+  checkBoxOn: { backgroundColor: colors.green, borderColor: colors.green },
+  checkMark: { color: '#FFFFFF', fontWeight: '800', fontSize: 15 },
+  checkLabel: { fontSize: 16, color: colors.text },
+  checkLabelOn: { color: colors.textMuted, textDecorationLine: 'line-through' },
   chip: {
     borderRadius: 999,
     borderWidth: 1,

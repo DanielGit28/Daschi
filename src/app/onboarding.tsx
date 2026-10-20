@@ -16,14 +16,14 @@ export default function Onboarding() {
       <View style={styles.hero}>
         <Text style={styles.churro}>🌭</Text>
         <Text style={styles.title}>¡Hola! Soy Churro.</Text>
-        <Muted>Contame de tu cachorro y te armo el plan de cada día según su edad.</Muted>
+        <Muted>Contame de tu cachorro y te armo el plan de cada día según su edad y lo que quieras trabajar.</Muted>
       </View>
       <DogForm
         submitLabel="Empezar"
         onSubmit={async (input) => {
           await createDog(db, input);
           await reload();
-          router.replace('/hoy');
+          router.replace('/enfoques');
         }}
       />
     </Screen>

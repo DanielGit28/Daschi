@@ -1,0 +1,44 @@
+[
+  { "id": "t-pre-1", "goal": "dormir", "preArrival": true, "text": "Pedile al criador una cobija o juguete con olor a la camada: ayuda mucho las primeras noches." },
+  { "id": "t-pre-2", "goal": "bano", "preArrival": true, "text": "Decidí ya dónde va a hacer sus necesidades. Cambiar el lugar después confunde." },
+  { "id": "t-pre-3", "goal": "caso", "preArrival": true, "text": "Practicá decir su nombre siempre con voz alegre: desde el día uno debe sonar a algo bueno." },
+  { "id": "t-pre-4", "goal": "espalda", "preArrival": true, "text": "Las rampas se aprenden más fácil de cachorro. Si vas a comprar una, que llegue antes que {nombre}." },
+
+  { "id": "t-bano-1", "goal": "bano", "maxWeeks": 26, "text": "Regla práctica: un cachorro aguanta más o menos tantas horas como meses tiene, más una. Despierto y jugando, mucho menos." },
+  { "id": "t-bano-2", "goal": "bano", "maxWeeks": 26, "text": "Los 3 momentos que casi nunca fallan: al despertar, 10-15 minutos después de comer y después de jugar." },
+  { "id": "t-bano-3", "goal": "bano", "maxWeeks": 26, "text": "Premiá en los 3 segundos después de que termina, ahí mismo afuera. Al volver adentro ya es tarde." },
+  { "id": "t-bano-4", "goal": "bano", "spot": "empapador", "text": "Con empapador: siempre en el mismo lugar, lejos de su cama y comida. Si más adelante querés pasar a la calle, movelo de a poco hacia la puerta." },
+  { "id": "t-bano-5", "goal": "bano", "spot": "calle", "text": "Antes de que el veterinario autorice pisar la calle, buscá un rincón limpio del patio o un empapador temporal cerca de la puerta." },
+  { "id": "t-bano-6", "goal": "bano", "spot": "patio", "text": "En el patio, llevá a {nombre} con correa al mismo rincón: el olor de la vez anterior le recuerda para qué está ahí." },
+  { "id": "t-bano-7", "goal": "bano", "maxWeeks": 26, "text": "Olfatear el suelo en círculos o irse a una esquina es la señal de \"ya viene\". ¡Afuera en ese momento!" },
+  { "id": "t-bano-8", "goal": "bano", "maxWeeks": 26, "text": "Retirá el agua 1 o 2 horas antes de dormir (no todo el día) para alargar la noche." },
+
+  { "id": "t-soc-1", "goal": "socializacion", "maxWeeks": 16, "text": "La meta no es conocer a todo el mundo sino que cada experiencia nueva sea buena. Calidad sobre cantidad." },
+  { "id": "t-soc-2", "goal": "socializacion", "maxWeeks": 16, "text": "Señales de que es demasiado: orejas atrás, cola entre las patas, bostezos, se esconde. Alejate y probá otro día más suave." },
+  { "id": "t-soc-3", "goal": "socializacion", "maxWeeks": 18, "text": "Meta sugerida: 2 o 3 cosas nuevas por día hasta las 16 semanas. Marcalas en la lista de socialización." },
+  { "id": "t-soc-4", "goal": "socializacion", "maxWeeks": 16, "text": "Antes de las vacunas completas: brazos, bolso o carro para ver el mundo, y solo perros sanos y vacunados que conozcás." },
+
+  { "id": "t-mord-1", "goal": "mordiscos", "maxWeeks": 24, "text": "Morder es normal y necesario. Lo que enseñamos es qué morder y con cuánta fuerza." },
+  { "id": "t-mord-2", "goal": "mordiscos", "maxWeeks": 24, "text": "Muchos \"ataques de mordiscos\" al final del día son sueño. Probá con una siesta antes de cualquier otra cosa." },
+  { "id": "t-mord-3", "goal": "mordiscos", "household": "ninos", "text": "Con niños: que jueguen con juguetes largos (cuerdas) y no con las manos, y siempre con un adulto cerca." },
+
+  { "id": "t-dorm-1", "goal": "dormir", "maxWeeks": 16, "text": "Un cachorro duerme 18 a 20 horas al día. Si está pasado de vueltas, no necesita más juego: necesita dormir." },
+  { "id": "t-dorm-2", "goal": "dormir", "text": "Nunca uses el guacal como castigo: tiene que ser su lugar favorito para descansar." },
+
+  { "id": "t-caso-1", "goal": "caso", "text": "Sesiones cortas ganan: 5 minutos, 2 o 3 veces al día, y terminá siempre con algo que le salga bien." },
+  { "id": "t-caso-2", "goal": "caso", "household": "familia", "text": "Todos en casa deben usar exactamente la misma palabra para cada señal: \"ven\" no es lo mismo que \"vení acá\"." },
+  { "id": "t-caso-3", "goal": "caso", "text": "Decí cada señal una sola vez. Si no responde, ayudalo con la mano o el premio en vez de repetir." },
+  { "id": "t-caso-4", "goal": "caso", "breeds": ["dachs", "salchich", "teckel"], "text": "Las salchichas son listas pero independientes: premios de alto valor y convertir todo en juego funciona mejor que insistir." },
+
+  { "id": "t-solo-1", "goal": "solo", "text": "Salidas y llegadas aburridas: sin despedidas largas ni saludos eufóricos. Así irte y volver no es un evento." },
+  { "id": "t-correa-1", "goal": "correa", "text": "Paseá con arnés, no collar: protege el cuello y, en razas largas, la espalda." },
+  { "id": "t-ladr-1", "goal": "ladridos", "text": "Antes de corregir un ladrido, preguntate qué necesita: ¿baño, aburrimiento, miedo, atención? La solución depende de eso." },
+  { "id": "t-truco-1", "goal": "trucos", "text": "Los trucos no son solo gracias: enseñan a tu cachorro a aprender, y eso hace todo lo demás más fácil." },
+  { "id": "t-olfato-1", "goal": "olfato", "text": "Servir parte de la comida escondida en una toalla o caja convierte cada comida en un juego de olfato." },
+  { "id": "t-manip-1", "goal": "manipulacion", "text": "Hacé \"visitas felices\" a la veterinaria: entrar, recibir premios y salir, sin ningún procedimiento." },
+
+  { "id": "t-esp-1", "goal": "espalda", "text": "Siempre cargar con dos manos: una bajo el pecho y otra bajo la cadera, con el cuerpo horizontal." },
+  { "id": "t-esp-2", "goal": "espalda", "text": "Nada de saltos desde sillones o camas, ni escaleras frecuentes. Rampas o en brazos." },
+  { "id": "t-esp-3", "goal": "espalda", "text": "Mantener el peso ideal es la mejor protección para la espalda. Contá los premios como parte de la comida del día." },
+  { "id": "t-esp-4", "goal": "espalda", "household": "ninos", "text": "Que los niños carguen a {nombre} solo sentados en el suelo: una caída desde los brazos es muy peligrosa para la espalda." }
+]

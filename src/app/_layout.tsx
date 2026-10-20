@@ -21,13 +21,27 @@ function ReminderSync() {
   return null;
 }
 
+// Pantallas de detalle: encabezado nativo con "Volver" y gesto de deslizar para atrás.
+const detailHeader = {
+  headerShown: true,
+  headerBackTitle: 'Volver',
+  headerTintColor: colors.caramel,
+  headerShadowVisible: false,
+  headerStyle: { backgroundColor: colors.background },
+  headerTitleStyle: { color: colors.text },
+};
+
 export default function RootLayout() {
   return (
     <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
       <DogProvider>
         <ReminderSync />
         <StatusBar style="dark" />
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }} />
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+          <Stack.Screen name="leccion/[id]" options={detailHeader} />
+          <Stack.Screen name="ruta/[id]" options={detailHeader} />
+          <Stack.Screen name="socializacion" options={{ ...detailHeader, title: '' }} />
+        </Stack>
       </DogProvider>
     </SQLiteProvider>
   );

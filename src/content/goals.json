@@ -1,0 +1,79 @@
+[
+  {
+    "id": "bano",
+    "name": "Baño",
+    "emoji": "🚽",
+    "summary": "Horarios fijos, un lugar de siempre y premio en el momento.",
+    "urgentUntilWeeks": 26
+  },
+  {
+    "id": "socializacion",
+    "name": "Socialización",
+    "emoji": "🌎",
+    "summary": "Conocer con calma personas, sonidos, superficies y lugares. La ventana se cierra cerca de las 16 semanas.",
+    "urgentUntilWeeks": 18
+  },
+  {
+    "id": "mordiscos",
+    "name": "Mordiscos y juego",
+    "emoji": "🦷",
+    "summary": "Aprender a morder suave y a morder lo correcto mientras le salen los dientes.",
+    "urgentUntilWeeks": 20
+  },
+  {
+    "id": "dormir",
+    "name": "Dormir y guacal",
+    "emoji": "🛏️",
+    "summary": "Primera noche, siestas largas y un espacio propio y seguro.",
+    "urgentUntilWeeks": 12
+  },
+  {
+    "id": "caso",
+    "name": "Hacer caso",
+    "emoji": "🎯",
+    "summary": "Nombre, mirarme, sentado, echado y ven: la base de todo lo demás."
+  },
+  {
+    "id": "solo",
+    "name": "Quedarse solo",
+    "emoji": "🏠",
+    "summary": "Ratos cortos a solas desde temprano para prevenir la ansiedad por separación."
+  },
+  {
+    "id": "correa",
+    "name": "Correa y paseos",
+    "emoji": "🦮",
+    "summary": "Arnés sin drama, caminar sin jalar y dejar cosas del suelo."
+  },
+  {
+    "id": "ladridos",
+    "name": "Ladridos",
+    "emoji": "🔊",
+    "summary": "Premiar la calma, enseñar silencio y manejar el ladrido de alerta."
+  },
+  {
+    "id": "trucos",
+    "name": "Trucos",
+    "emoji": "🎩",
+    "summary": "Juegos cortos que fortalecen el vínculo y cansan la mente."
+  },
+  {
+    "id": "olfato",
+    "name": "Olfato y enriquecimiento",
+    "emoji": "👃",
+    "summary": "Buscar, olfatear y escarbar: el instinto de salchicha bien canalizado."
+  },
+  {
+    "id": "manipulacion",
+    "name": "Manipulación y veterinario",
+    "emoji": "✋",
+    "summary": "Que tocar patas, orejas, dientes y uñas sea normal y hasta agradable."
+  },
+  {
+    "id": "espalda",
+    "name": "Espalda sana",
+    "emoji": "🦴",
+    "summary": "Rampas, cargar bien y evitar saltos. Clave en salchichas.",
+    "breeds": ["dachs", "salchich", "teckel"]
+  }
+]

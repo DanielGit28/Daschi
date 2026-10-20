@@ -3,14 +3,18 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { PottyRow, pottyLabel } from '../../components/PottyRow';
-import { Button, Card, H2, Muted, Screen } from '../../components/ui';
-import { ageInWeeks, ageLabel, stageForWeeks } from '../../lib/age';
+import { Button, Card, CheckRow, H2, Muted, ProgressBar, Screen } from '../../components/ui';
+import { CONTENT, goalById, personalize, type Lesson } from '../../content';
+import { ageLabel, parseISODate, stageForWeeks } from '../../lib/age';
 import {
   addPottyLog,
+  addSocializationLog,
   deletePottyLog,
   getLastPottyLog,
   getPottyLogsSince,
   getReminders,
+  setItemDone,
+  updateReminder,
   type PottyKind,
   type PottyLog,
   type PottyPlace,
@@ -18,8 +22,10 @@ import {
 } from '../../lib/db';
 import { useDog } from '../../lib/dog-context';
 import { syncReminders } from '../../lib/notifications';
+import { activeGoals, dayKey, pottyAdvice, socializationPicks, tipOfDay, todayLessons } from '../../lib/plan';
 import { parseTime, pottyStatus } from '../../lib/schedule';
 import { colors, radius, space } from '../../lib/theme';
+import { usePlan, type PlanState } from '../../lib/use-plan';
 
 function startOfToday() {
   const d = new Date();
@@ -31,6 +37,7 @@ const UNDO_MS = 8000;
 export default function Hoy() {
   const db = useSQLiteContext();
   const { dog } = useDog();
+  const { state: plan, reload: reloadPlan } = usePlan(dog);
   const [logs, setLogs] = useState<PottyLog[]>([]);
   const [lastLog, setLastLog] = useState<PottyLog | null>(null);
   const [pottyReminder, setPottyReminder] = useState<Reminder | null>(null);
@@ -66,10 +73,12 @@ export default function Hoy() {
     }, [load]),
   );
 
-  if (!dog) return null;
+  if (!dog || !plan) return null;
 
-  const weeks = ageInWeeks(dog.birth_date);
-  const stage = stageForWeeks(weeks);
+  const stage = stageForWeeks(plan.profile.weeks);
+  const t = (text: string) => personalize(text, dog.name);
+  const lessons = todayLessons(plan.profile, plan.progress, CONTENT, now);
+  const tip = tipOfDay(plan.profile, CONTENT, now);
   const outside = logs.filter((l) => l.place === 'fuera').length;
   const inside = logs.filter((l) => l.place === 'dentro').length;
 
@@ -86,6 +95,47 @@ export default function Hoy() {
     await deletePottyLog(db, id);
     await load();
     await syncReminders(db);
+  }
+
+  async function toggleItem(itemId: string, done: boolean) {
+    if (!dog) return;
+    await setItemDone(db, dog.id, itemId, done);
+    await reloadPlan();
+  }
+
+  if (plan.profile.preArrival) {
+    const arrival = parseISODate(dog.arrival_date!)!;
+    const daysLeft = Math.round((arrival.getTime() - parseISODate(dayKey(now))!.getTime()) / (24 * 60 * 60 * 1000));
+    return (
+      <Screen title={`Preparando todo para ${dog.name}`}>
+        <Card style={styles.hero}>
+          <Text style={styles.churro}>🌭</Text>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={styles.age}>{daysLeft === 1 ? '¡Llega mañana!' : `Faltan ${daysLeft} días`}</Text>
+            <Muted>Mientras tanto, dejemos la casa lista.</Muted>
+          </View>
+        </Card>
+        <PrepChecklist plan={plan} onToggle={toggleItem} />
+        <LessonList title="Para leer antes de que llegue" lessons={lessons} plan={plan} now={now} />
+        {tip ? <TipCard text={t(tip.text)} /> : null}
+      </Screen>
+    );
+  }
+
+  const advice = pottyAdvice(inside, outside, pottyReminder?.enabled ? pottyReminder.interval_min : null);
+  const socialActive = activeGoals(plan.profile, CONTENT.goals).some((a) => a.goal.id === 'socializacion');
+
+  async function applyInterval(minutes: number) {
+    if (!pottyReminder) return;
+    await updateReminder(db, pottyReminder.id, { interval_min: minutes });
+    await load();
+    await syncReminders(db);
+  }
+
+  async function socialGood(itemId: string) {
+    if (!dog) return;
+    await addSocializationLog(db, dog.id, itemId, 'bien');
+    await reloadPlan();
   }
 
   return (
@@ -142,14 +192,102 @@ export default function Hoy() {
           </View>
         )}
         {inside > 0 ? <Muted>Los accidentes son normales a esta edad. Limpiá con limpiador enzimático y seguí con la rutina.</Muted> : null}
+        {advice ? (
+          <View style={styles.advice}>
+            <Text style={styles.adviceText}>🧠 {advice.text}</Text>
+            {advice.suggestInterval ? (
+              <Button label={`Avisarme cada ${advice.suggestInterval} min`} variant="secondary" onPress={() => applyInterval(advice.suggestInterval!)} />
+            ) : null}
+          </View>
+        ) : null}
       </Card>
 
-      <Card>
-        <H2>Lecciones de hoy</H2>
-        <Muted>Foco de esta etapa: {stage.focus}.</Muted>
-        <Muted>Las lecciones de 5 minutos aparecen aquí a partir del jueves.</Muted>
-      </Card>
+      <LessonList title="Lecciones de hoy" lessons={lessons} plan={plan} now={now} />
+
+      {socialActive ? (
+        <Card>
+          <H2>🌎 Socialización de hoy</H2>
+          <Muted>Probá con calma y premios. Si le fue bien, tocá 😀.</Muted>
+          {socializationPicks(CONTENT.socialization, plan.socialCovered, now).map((item) => (
+            <View key={item.id} style={styles.socialRow}>
+              <Text style={styles.socialText}>{item.text}</Text>
+              <Pressable onPress={() => socialGood(item.id)} hitSlop={8} style={styles.socialButton} accessibilityLabel="Le fue bien">
+                <Text style={styles.socialButtonText}>😀</Text>
+              </Pressable>
+            </View>
+          ))}
+          <Pressable onPress={() => router.push('/socializacion')} hitSlop={8}>
+            <Text style={styles.link}>
+              Ver lista completa ({plan.socialCovered.size}/{CONTENT.socialization.length}) ›
+            </Text>
+          </Pressable>
+        </Card>
+      ) : null}
+
+      {tip ? <TipCard text={t(tip.text)} /> : null}
     </Screen>
+  );
+}
+
+function LessonList({ title, lessons, plan, now }: { title: string; lessons: Lesson[]; plan: PlanState; now: Date }) {
+  const today = dayKey(now);
+  return (
+    <Card>
+      <H2>{title}</H2>
+      {lessons.length === 0 ? <Muted>¡Todo al día! Repasá lo logrado o explorá otros enfoques en Aprender.</Muted> : null}
+      {lessons.map((l) => {
+        const goal = goalById(l.goal);
+        const last = plan.progress.lastPracticed.get(l.id);
+        const doneToday = last != null && dayKey(new Date(last)) === today;
+        return (
+          <Pressable key={l.id} onPress={() => router.push(`/leccion/${l.id}`)} style={styles.lesson}>
+            <Text style={styles.lessonEmoji}>{goal?.emoji}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.lessonTitle}>{l.title}</Text>
+              <Text style={styles.lessonMeta}>
+                {l.kind === 'guia' ? 'Guía para leer' : '5 minutos'} · {goal?.name}
+                {doneToday ? ' · ✓ hecha hoy' : ''}
+              </Text>
+            </View>
+            <Text style={styles.chevron}>›</Text>
+          </Pressable>
+        );
+      })}
+    </Card>
+  );
+}
+
+function PrepChecklist({ plan, onToggle }: { plan: PlanState; onToggle: (id: string, done: boolean) => void }) {
+  const done = CONTENT.prep.filter((i) => plan.done.has(i.id)).length;
+  const groups = new Map<string, typeof CONTENT.prep>();
+  for (const item of CONTENT.prep) groups.set(item.group, [...(groups.get(item.group) ?? []), item]);
+  return (
+    <Card>
+      <View style={styles.prepHeader}>
+        <H2>📋 Lista de preparación</H2>
+        <Text style={styles.prepCount}>
+          {done}/{CONTENT.prep.length}
+        </Text>
+      </View>
+      <ProgressBar value={done} max={CONTENT.prep.length} />
+      {[...groups.entries()].map(([group, items]) => (
+        <View key={group}>
+          <Text style={styles.prepGroup}>{group}</Text>
+          {items.map((item) => (
+            <CheckRow key={item.id} checked={plan.done.has(item.id)} label={item.text} onPress={() => onToggle(item.id, !plan.done.has(item.id))} />
+          ))}
+        </View>
+      ))}
+    </Card>
+  );
+}
+
+function TipCard({ text }: { text: string }) {
+  return (
+    <Card style={styles.tip}>
+      <Text style={styles.tipTitle}>💡 Tip del día</Text>
+      <Text style={styles.tipText}>{text}</Text>
+    </Card>
   );
 }
 
@@ -222,6 +360,24 @@ const styles = StyleSheet.create({
   undoAction: { color: colors.caramelSoft, fontSize: 15, fontWeight: '800' },
   overdue: { backgroundColor: colors.caramelSoft, borderColor: colors.caramel, borderWidth: 2 },
   nextTitle: { fontSize: 20, fontWeight: '700', color: colors.text },
+  advice: { gap: space.sm, backgroundColor: colors.caramelSoft, borderRadius: radius.sm, padding: space.md },
+  adviceText: { fontSize: 15, color: colors.text, lineHeight: 21 },
+  lesson: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm },
+  lessonEmoji: { fontSize: 26 },
+  lessonTitle: { fontSize: 17, fontWeight: '700', color: colors.text },
+  lessonMeta: { fontSize: 14, color: colors.textMuted },
+  chevron: { fontSize: 24, color: colors.textMuted },
+  socialRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: 6 },
+  socialText: { flex: 1, fontSize: 16, color: colors.text },
+  socialButton: { backgroundColor: colors.greenSoft, borderRadius: radius.sm, paddingHorizontal: 14, paddingVertical: 8 },
+  socialButtonText: { fontSize: 20 },
+  link: { fontSize: 15, fontWeight: '700', color: colors.caramel },
+  prepHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  prepCount: { fontSize: 16, fontWeight: '700', color: colors.green },
+  prepGroup: { fontSize: 14, fontWeight: '700', color: colors.textMuted, marginTop: space.sm, textTransform: 'uppercase' },
+  tip: { backgroundColor: colors.greenSoft, borderColor: colors.green },
+  tipTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
+  tipText: { fontSize: 16, color: colors.text, lineHeight: 23 },
   stat: { flex: 1, borderWidth: 2, borderRadius: radius.sm, paddingVertical: space.sm, alignItems: 'center' },
   statValue: { fontSize: 26, fontWeight: '800' },
   statLabel: { fontSize: 13, color: colors.textMuted },
