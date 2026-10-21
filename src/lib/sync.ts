@@ -19,7 +19,7 @@ export type Transport = (req: SyncRequest) => Promise<SyncResponse>;
  * En web y en desarrollo las rutas relativas llegan al mismo servidor de Expo.
  * Para la app nativa en producción se define EXPO_PUBLIC_API_URL (por ejemplo, la URL de Vercel).
  */
-function apiUrl(path: string) {
+export function apiUrl(path: string) {
   const base = process.env.EXPO_PUBLIC_API_URL;
   return base ? `${base.replace(/\/$/, '')}${path}` : path;
 }

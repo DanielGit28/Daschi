@@ -86,7 +86,7 @@ export type SocializationLog = SyncFields & {
 export const DEFAULT_QUIET_START = '22:00';
 export const DEFAULT_QUIET_END = '06:00';
 
-const DATABASE_VERSION = 5;
+const DATABASE_VERSION = 6;
 
 const now = () => new Date().toISOString();
 
@@ -284,6 +284,18 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
     current = 5;
   }
 
+  if (current < 6) {
+    await db.execAsync(`
+      CREATE TABLE photos (
+        id TEXT PRIMARY KEY, dog_id TEXT NOT NULL, url TEXT NOT NULL, taken_at TEXT NOT NULL, caption TEXT,
+        level_id TEXT, width INTEGER, height INTEGER,
+        updated_at TEXT NOT NULL, deleted INTEGER NOT NULL DEFAULT 0, dirty INTEGER NOT NULL DEFAULT 1
+      );
+      CREATE INDEX idx_photos_dog_time ON photos(dog_id, taken_at);
+    `);
+    current = 6;
+  }
+
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
 
@@ -424,6 +436,17 @@ export async function addSocializationLog(db: SQLiteDatabase, dogId: string, ite
   await upsert(db, 'socialization_logs', { id: randomUUID(), dog_id: dogId, item_id: itemId, logged_at: now(), reaction });
 }
 
+/** Fechas de práctica (sesiones de lecciones y socialización), para la racha. */
+export async function getPracticeDates(db: SQLiteDatabase, dogId: string) {
+  const rows = await db.getAllAsync<{ logged_at: string }>(
+    `SELECT logged_at FROM session_logs WHERE dog_id = ? AND deleted = 0
+     UNION ALL SELECT logged_at FROM socialization_logs WHERE dog_id = ? AND deleted = 0`,
+    dogId,
+    dogId,
+  );
+  return rows.map((r) => r.logged_at);
+}
+
 export function getSocializationLogs(db: SQLiteDatabase, dogId: string) {
   return db.getAllAsync<SocializationLog>(
     'SELECT * FROM socialization_logs WHERE dog_id = ? AND deleted = 0 ORDER BY logged_at DESC',
@@ -433,6 +456,34 @@ export function getSocializationLogs(db: SQLiteDatabase, dogId: string) {
 
 export async function deleteSocializationLog(db: SQLiteDatabase, id: string) {
   await softDelete(db, 'socialization_logs', id);
+}
+
+// ---------- Fotos ----------
+
+export type Photo = SyncFields & {
+  id: string;
+  dog_id: string;
+  /** URL pública en Vercel Blob. */
+  url: string;
+  taken_at: string;
+  caption: string | null;
+  level_id: string | null;
+  width: number | null;
+  height: number | null;
+};
+
+export async function addPhoto(db: SQLiteDatabase, photo: Omit<Photo, keyof SyncFields | 'id'>) {
+  const id = randomUUID();
+  await upsert(db, 'photos', { id, ...photo });
+  return id;
+}
+
+export function getPhotos(db: SQLiteDatabase, dogId: string) {
+  return db.getAllAsync<Photo>('SELECT * FROM photos WHERE dog_id = ? AND deleted = 0 ORDER BY taken_at DESC', dogId);
+}
+
+export async function deletePhoto(db: SQLiteDatabase, id: string) {
+  await softDelete(db, 'photos', id);
 }
 
 // ---------- Comida y siesta ----------

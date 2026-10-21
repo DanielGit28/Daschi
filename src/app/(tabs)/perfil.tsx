@@ -1,12 +1,13 @@
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
-import { Alert, Pressable, Share, StyleSheet, Text } from 'react-native';
+import { Pressable, Share, StyleSheet, Text } from 'react-native';
 import { DogForm } from '../../components/DogForm';
 import { Button, Card, H2, Muted, Screen } from '../../components/ui';
 import { CONTENT } from '../../content';
 import { formatHumanDate } from '../../lib/age';
 import { deleteDog, exportAll, updateDog } from '../../lib/db';
+import { confirmAction, notify } from '../../lib/dialogs';
 import { useDog } from '../../lib/dog-context';
 import { syncReminders } from '../../lib/notifications';
 import { activeGoals } from '../../lib/plan';
@@ -34,22 +35,16 @@ export default function Perfil() {
 
   function confirmDelete() {
     if (!dog) return;
-    Alert.alert(
+    confirmAction(
       `¿Eliminar a ${dog.name}?`,
       'Se borran su perfil, registros y progreso en todos los dispositivos. No se puede deshacer.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            await deleteDog(db, dog.id);
-            await selectDog(null);
-            await syncReminders(db);
-            router.replace('/mascotas');
-          },
-        },
-      ],
+      'Eliminar',
+      async () => {
+        await deleteDog(db, dog.id);
+        await selectDog(null);
+        await syncReminders(db);
+        router.replace('/mascotas');
+      },
     );
   }
 
@@ -101,7 +96,7 @@ export default function Perfil() {
         <Button
           label="Exportar respaldo"
           variant="secondary"
-          onPress={() => handleExport().catch((e) => Alert.alert('No se pudo exportar', String(e)))}
+          onPress={() => handleExport().catch((e) => notify('No se pudo exportar', String(e)))}
         />
       </Card>
 

@@ -10,6 +10,7 @@ export const SYNC_TABLES = {
   session_logs: ['id', 'dog_id', 'lesson_id', 'logged_at', 'reps', 'rating', 'note'],
   socialization_logs: ['id', 'dog_id', 'item_id', 'logged_at', 'reaction'],
   activity_logs: ['id', 'dog_id', 'kind', 'logged_at', 'note'],
+  photos: ['id', 'dog_id', 'url', 'taken_at', 'caption', 'level_id', 'width', 'height'],
 } as const;
 
 export type SyncTable = keyof typeof SYNC_TABLES;

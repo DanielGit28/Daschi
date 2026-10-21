@@ -1,7 +1,7 @@
 import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
-import { Alert, Linking, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Linking, Platform, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { Button, Card, Chip, H2, Muted, Screen } from '../../components/ui';
 import {
   addFixedReminder,
@@ -14,7 +14,9 @@ import {
 } from '../../lib/db';
 import { personalize } from '../../content';
 import { useDog } from '../../lib/dog-context';
+import { confirmAction, notify } from '../../lib/dialogs';
 import { ensureNotificationPermission, hasNotificationPermission, syncReminders } from '../../lib/notifications';
+import { disableWebPush, enableWebPush, webPushStatus, type WebPushStatus } from '../../lib/web-push';
 import { formatTime, parseTime } from '../../lib/schedule';
 import { colors, radius, space } from '../../lib/theme';
 
@@ -38,13 +40,15 @@ export default function Recordatorios() {
   const { dog } = useDog();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [permission, setPermission] = useState(true);
+  const [webStatus, setWebStatus] = useState<WebPushStatus>('unsupported');
   const [draft, setDraft] = useState<Draft | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!dog) return;
     setReminders(await getReminders(db, dog.id));
-    setPermission(await hasNotificationPermission());
+    setPermission(await hasNotificationPermission(db));
+    setWebStatus(await webPushStatus(db));
   }, [db, dog]);
 
   useFocusEffect(
@@ -60,16 +64,18 @@ export default function Recordatorios() {
 
   async function save(id: string, patch: ReminderPatch) {
     if (patch.enabled) {
-      const ok = await ensureNotificationPermission();
+      const ok = await ensureNotificationPermission(db);
       setPermission(ok);
-      if (!ok) {
-        Alert.alert(
+      setWebStatus(await webPushStatus(db));
+      if (!ok && Platform.OS === 'web') {
+        notify('Notificaciones apagadas en este navegador', 'Igual queda guardado y se sincroniza. Mirá arriba cómo activarlas.');
+      } else if (!ok) {
+        confirmAction(
           'Notificaciones apagadas',
           'Para recibir recordatorios, activá las notificaciones de Expo Go en Ajustes.',
-          [
-            { text: 'Ahora no', style: 'cancel' },
-            { text: 'Abrir Ajustes', onPress: () => Linking.openSettings() },
-          ],
+          'Abrir Ajustes',
+          () => Linking.openSettings(),
+          false,
         );
       }
     }
@@ -86,7 +92,7 @@ export default function Recordatorios() {
     const time = formatTime(minutes);
     setError(null);
     if (draft.id === 'new') {
-      await ensureNotificationPermission().then(setPermission);
+      await ensureNotificationPermission(db).then(setPermission);
       await addFixedReminder(db, dog.id, draft.kind, draft.label.trim(), time);
     } else {
       await updateReminder(db, draft.id, { kind: draft.kind, label: draft.label.trim(), time_of_day: time });
@@ -97,24 +103,19 @@ export default function Recordatorios() {
   }
 
   function confirmDelete(r: Reminder) {
-    Alert.alert('Borrar recordatorio', `¿Borrar "${r.label}"?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Borrar',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteReminder(db, r.id);
-          setDraft(null);
-          await load();
-          await syncReminders(db);
-        },
-      },
-    ]);
+    confirmAction('Borrar recordatorio', `¿Borrar "${r.label}"?`, 'Borrar', async () => {
+      await deleteReminder(db, r.id);
+      setDraft(null);
+      await load();
+      await syncReminders(db);
+    });
   }
 
   return (
     <Screen title="Recordatorios">
-      {!permission && reminders.some((r) => r.enabled) ? (
+      {Platform.OS === 'web' ? <WebPushCard status={webStatus} onChange={load} /> : null}
+
+      {Platform.OS !== 'web' && !permission && reminders.some((r) => r.enabled) ? (
         <Card style={styles.warning}>
           <Muted>Las notificaciones están apagadas. Sin permiso, Dachsi no puede avisarte.</Muted>
           <Button label="Abrir Ajustes" variant="secondary" onPress={() => Linking.openSettings()} />
@@ -189,6 +190,42 @@ export default function Recordatorios() {
         )}
       </Card>
     </Screen>
+  );
+}
+
+/** En la web: activar notificaciones en este navegador (en iPhone, solo desde la pantalla de inicio). */
+function WebPushCard({ status, onChange }: { status: WebPushStatus; onChange: () => void }) {
+  const db = useSQLiteContext();
+  const [busy, setBusy] = useState(false);
+
+  async function toggle() {
+    setBusy(true);
+    try {
+      if (status === 'on') await disableWebPush(db);
+      else if (!(await enableWebPush(db))) notify('No se pudieron activar', 'Revisá que el navegador tenga permiso para mostrar notificaciones de Dachsi.');
+      else await syncReminders(db);
+    } finally {
+      setBusy(false);
+      onChange();
+    }
+  }
+
+  const text: Record<WebPushStatus, string> = {
+    on: 'Activadas en este dispositivo. Los avisos llegan aunque Dachsi esté cerrado.',
+    off: 'Activalas para que este dispositivo te avise cuándo salir al baño, comer o entrenar.',
+    denied: 'El navegador bloqueó las notificaciones de Dachsi. Habilitalas en los ajustes del navegador.',
+    'needs-install': 'En iPhone: tocá Compartir → "Agregar a pantalla de inicio", abrí Dachsi desde ese ícono y activalas desde ahí.',
+    unsupported: 'Este navegador no permite notificaciones.',
+  };
+
+  return (
+    <Card style={status === 'on' ? undefined : styles.warning}>
+      <H2>🔔 Notificaciones en este dispositivo</H2>
+      <Muted>{text[status]}</Muted>
+      {status === 'on' || status === 'off' ? (
+        <Button label={busy ? '…' : status === 'on' ? 'Desactivar' : 'Activar notificaciones'} variant={status === 'on' ? 'secondary' : 'primary'} onPress={toggle} disabled={busy} />
+      ) : null}
+    </Card>
   );
 }
 

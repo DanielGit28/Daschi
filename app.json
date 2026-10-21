@@ -39,7 +39,14 @@
         {}
       ],
       "expo-status-bar",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Dachsi usa tus fotos para la línea de tiempo de tu mascota.",
+          "cameraPermission": "Dachsi usa la cámara para sacar fotos de tu mascota."
+        }
+      ]
     ],
     "scheme": "dachsi",
     "extra": {

@@ -43,6 +43,7 @@ export default function RootLayout() {
             <Stack.Screen name="leccion/[id]" options={detailHeader} />
             <Stack.Screen name="ruta/[id]" options={detailHeader} />
             <Stack.Screen name="socializacion" options={{ ...detailHeader, title: '' }} />
+            <Stack.Screen name="progreso" options={detailHeader} />
           </Stack>
         </SyncProvider>
       </DogProvider>

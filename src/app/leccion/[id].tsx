@@ -2,10 +2,12 @@ import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
+import { LevelUp } from '../../components/LevelUp';
 import { Button, Card, Chip, H2, Muted, Screen } from '../../components/ui';
 import { goalById, lessonById, personalize } from '../../content';
 import { addSessionLog, getDoneItems, getSessionLogs, setItemDone, type SessionLog } from '../../lib/db';
 import { useDog } from '../../lib/dog-context';
+import { usePlan } from '../../lib/use-plan';
 import { colors, radius, space } from '../../lib/theme';
 
 const SESSION_SECONDS = 5 * 60;
@@ -29,6 +31,7 @@ export default function Leccion() {
   const db = useSQLiteContext();
   const { dog } = useDog();
   const lesson = lessonById(id);
+  const { state: plan, reload: reloadPlan } = usePlan(dog);
   const [done, setDone] = useState(false);
   const [history, setHistory] = useState<SessionLog[]>([]);
 
@@ -60,10 +63,12 @@ export default function Leccion() {
     if (!dog || !lesson) return;
     await setItemDone(db, dog.id, lesson.id, !done);
     await load();
+    await reloadPlan(); // puede subir de nivel
   }
 
   return (
     <Screen underHeader>
+      {plan ? <LevelUp dog={dog} plan={plan} onDone={reloadPlan} /> : null}
       <Stack.Screen options={{ title: goal ? `${goal.emoji} ${goal.name}` : '' }} />
 
       <View style={{ gap: space.xs }}>

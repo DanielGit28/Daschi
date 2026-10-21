@@ -1,5 +1,6 @@
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { ActivityKind, ActivityLog, PottyLog } from '../lib/db';
+import { confirmAction } from '../lib/dialogs';
 import { colors, space } from '../lib/theme';
 
 /** 'pipí afuera', 'popó adentro', ... */
@@ -43,10 +44,9 @@ export function toEntries(potty: PottyLog[], activities: ActivityLog[]): DayEntr
 /** Fila de un registro con botón visible para borrarlo (pide confirmación). */
 export function LogRow({ entry, onDelete }: { entry: DayEntry; onDelete: (entry: DayEntry) => void }) {
   function confirm() {
-    Alert.alert('Borrar registro', `¿Borrar "${entry.label.slice(entry.label.indexOf(' ') + 1)}" de las ${timeLabel(entry.at)}?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Borrar', style: 'destructive', onPress: () => onDelete(entry) },
-    ]);
+    confirmAction('Borrar registro', `¿Borrar "${entry.label.slice(entry.label.indexOf(' ') + 1)}" de las ${timeLabel(entry.at)}?`, 'Borrar', () =>
+      onDelete(entry),
+    );
   }
 
   return (

@@ -3,6 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { LevelUp } from '../../components/LevelUp';
 import { Mascot, Spots } from '../../components/Mascot';
 import { activityLabel, LogRow, pottyLabel, toEntries, type DayEntry } from '../../components/LogRow';
 import { Button, Card, CheckRow, Chip, H2, Muted, ProgressBar, Screen } from '../../components/ui';
@@ -186,9 +187,15 @@ export default function Hoy() {
           <Muted>
             Etapa {stage.number} · {stage.name}
           </Muted>
+          <Pressable onPress={() => router.push('/progreso')} hitSlop={6} style={styles.progressChip} accessibilityRole="button">
+            <Text style={styles.progressChipText}>
+              {plan.level ? `${plan.level.emoji} ${plan.level.name}` : '🌱 Empezando'} · 🔥 {plan.streak} ›
+            </Text>
+          </Pressable>
           <SwitchDog />
         </View>
       </Card>
+      <LevelUp dog={dog} plan={plan} onDone={reloadPlan} />
 
       <NextOuting reminder={pottyReminder} lastLog={lastLog} lastActivity={lastActivity} now={now} />
 
@@ -425,6 +432,8 @@ function Stat({ value, label, color }: { value: number; label: string; color: st
 const styles = StyleSheet.create({
   hero: { flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: colors.accentSoft, borderColor: colors.accentSoft, overflow: 'hidden' },
   switchDog: { alignSelf: 'flex-start', marginTop: space.xs },
+  progressChip: { alignSelf: 'flex-start', marginTop: space.xs, backgroundColor: colors.surfaceRaised, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  progressChipText: { fontSize: 14, fontWeight: '700', color: colors.text },
   switchDogText: { fontSize: 14, fontWeight: '700', color: colors.accent },
   age: { fontSize: 20, fontWeight: '700', color: colors.text },
   row: { flexDirection: 'row', gap: space.sm },

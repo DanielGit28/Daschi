@@ -2,6 +2,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { timeLabel } from '../components/LogRow';
+import { LevelUp } from '../components/LevelUp';
 import { Button, Card, Muted, ProgressBar, Screen } from '../components/ui';
 import { CONTENT } from '../content';
 import { addSocializationLog, deleteSocializationLog, type Reaction } from '../lib/db';
@@ -46,6 +47,7 @@ export default function Socializacion() {
 
   return (
     <Screen underHeader>
+      <LevelUp dog={dog} plan={state} onDone={reload} />
       <Text style={styles.title}>🌎 Socialización</Text>
       <Muted>
         Cada cosa nueva, con calma y premios. Marcá cómo reaccionó {dog.name}: lo que da miedo se repite otro día, más suave y desde más lejos.

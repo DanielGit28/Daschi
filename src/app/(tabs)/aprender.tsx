@@ -30,6 +30,16 @@ export default function Aprender() {
         <Muted>{current.focus}.</Muted>
       </Card>
 
+      <Pressable onPress={() => router.push('/progreso')} accessibilityRole="button">
+        <Card>
+          <View style={styles.goalHeader}>
+            <Text style={styles.goalName}>{state.level ? `${state.level.emoji} Nivel ${state.level.name}` : '🌱 Primer nivel en camino'}</Text>
+            <Text style={styles.badge}>🔥 {state.streak}</Text>
+          </View>
+          <Muted>Ver progreso y lo que falta para el siguiente nivel ›</Muted>
+        </Card>
+      </Pressable>
+
       <View style={styles.sectionHeader}>
         <H2>Tus enfoques</H2>
         <Pressable onPress={() => router.push('/enfoques?editar=1')} hitSlop={10}>
